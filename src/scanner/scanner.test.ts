@@ -19,3 +19,9 @@ import { scanner } from './scanner.js';
 console.log(scanner(`
   A = (ab)ab<"ciao">.nil;
 `))
+
+console.log(
+  scanner(`
+  A = (ab)ab<23.23>.nil;
+`),
+);
