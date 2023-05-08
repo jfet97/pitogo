@@ -1,9 +1,9 @@
 import { Position } from '../common/Position.js';
 import { TAGS, Token, buildToken } from './tokens.js';
 
-const RESERVED_WORDS = ['nil'];
+const KEYWORDS = ['nil'];
 
-export function lexer(input: string): Token[] {
+export function scanner(input: string): Token[] {
   const toRet = [];
 
   let index = 0; // position in input
@@ -141,9 +141,7 @@ export function lexer(input: string): Token[] {
 
           addToken(TAGS.NumberLiteral, Number(input.slice(start, index)));
         } else if (/[a-zA-Z_]/.test(char)) {
-          // handle identifiers
-
-          const peeked = peek();
+          // handle identifiers and keywords
 
           while (/[a-zA-Z0-9_]/.test(peek())) {
             advance();
@@ -151,7 +149,7 @@ export function lexer(input: string): Token[] {
 
           const identifier = input.slice(start, index);
 
-          if (RESERVED_WORDS.includes(identifier)) {
+          if (KEYWORDS.includes(identifier)) {
             addToken(TAGS.Nil);
           } else {
             addToken(TAGS.Identifier, identifier);
