@@ -150,7 +150,11 @@ export function scanner(input: string): Token[] {
           const identifier = input.slice(start, index);
 
           if (KEYWORDS.includes(identifier)) {
-            addToken(TOKENS.Nil);
+            if (identifier === 'nil') {
+              addToken(TOKENS.Nil);
+            } else if (identifier === 'main') {
+              addToken(TOKENS.Main);
+            }
           } else {
             addToken(TOKENS.Identifier, identifier);
           }

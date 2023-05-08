@@ -1,4 +1,4 @@
-import { scanner } from './scanner.js';
+import { scanner } from './index.js';
 
 // console.log(
 //   scanner(`
@@ -16,9 +16,11 @@ import { scanner } from './scanner.js';
 //   `),
 // );
 
-console.log(scanner(`
+console.log(
+  scanner(`
   A = (ab)ab<"ciao">.nil;
-`))
+`),
+);
 
 console.log(
   scanner(`

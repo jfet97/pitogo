@@ -2,8 +2,8 @@ import { Position } from '../common/Position.js';
 import * as S from '../scanner/index.js';
 import * as AST from './ast.js';
 
-// LL(2) parser
-function parse(tokens: readonly S.Token[]): AST.Program {
+// LL(3) parser ???
+export function parse(tokens: readonly S.Token[]): AST.Program {
   let index = 0;
 
   function isAtEnd(n = 0): boolean {
@@ -17,6 +17,9 @@ function parse(tokens: readonly S.Token[]): AST.Program {
   }
   function match(tag: S.Token['_tag']): boolean {
     return check(tag) && !!advance();
+  }
+  function back(n = 1): void {
+    index -= n;
   }
 
   // parsers
@@ -34,9 +37,9 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     return AST.buildNode(AST.NODES.Program, {
       position: new Position(
-        declarations[0].position.row_start ?? main.position.row_start,
+        declarations[0]?.position.row_start ?? main.position.row_start,
         main.position.row_end,
-        declarations[0].position.column_start ?? main.position.column_start,
+        declarations[0]?.position.column_start ?? main.position.column_start,
         main.position.column_end,
       ),
       declarations,
@@ -52,7 +55,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     // equal
     if (!match(S.TOKENS.Equal)) {
-      throw new Error('Expected an equal sign');
+      raise('Expected an equal sign');
     }
 
     // process
@@ -82,13 +85,13 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     // main
     if (!check(S.TOKENS.Main)) {
-      throw new Error('Expected the main keyword');
+      raise('Expected the main keyword');
     }
     const main = advance();
 
     // equal
     if (!match(S.TOKENS.Equal)) {
-      throw new Error('Expected an equal sign');
+      raise('Expected an equal sign');
     }
 
     // process
@@ -96,7 +99,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     // semicolon
     if (!check(S.TOKENS.Semicolon)) {
-      throw new Error('Expected a semicolon');
+      raise('Expected a semicolon');
     }
     const semicolon = advance();
 
@@ -117,12 +120,22 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     const prefixes: AST.ActionPrefix[] = [];
 
+    console.log(tokens[index]);
+
     // (Prefix TOKEN.Dot)*
     while (check(S.TOKENS.Identifier)) {
+      // TODO: disambiguate (as vs (A that is a Matching
+      try {
+        parseIdentifier(AST.NODES.Identifier);
+        back();
+      } catch (e) {
+        break;
+      }
+
       const prefix = parsePrefix();
 
       if (!match(S.TOKENS.Dot)) {
-        throw new Error('Expected a dot');
+        raise('Expected a dot');
       }
 
       prefixes.push(
@@ -158,12 +171,13 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parsePrefix(): AST.Prefix {
     // Prefix -> SendMessage | ReceiveMessage
+
     if (check(S.TOKENS.OpenAngleBracket, 1)) {
       return parseSendMessage();
     } else if (check(S.TOKENS.OpenParenthesis, 1)) {
       return parseReceiveMessage();
     } else {
-      throw new Error('Unexpected prefix type');
+      raise('Unexpected prefix type');
     }
   }
 
@@ -172,13 +186,13 @@ function parse(tokens: readonly S.Token[]): AST.Program {
     const channel = parseIdentifier(AST.NODES.Identifier);
 
     if (!match(S.TOKENS.OpenAngleBracket)) {
-      throw new Error('Expected an open angle bracket');
+      raise('Expected an open angle bracket');
     }
 
     const message = parseMessage();
 
     if (!match(S.TOKENS.CloseAngleBracket)) {
-      throw new Error('Expected a close angle bracket');
+      raise('Expected a close angle bracket');
     }
 
     return AST.buildNode(AST.NODES.SendMessage, {
@@ -197,14 +211,14 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     const channel = parseIdentifier(AST.NODES.Identifier);
 
-    if (!match(S.TOKENS.OpenAngleBracket)) {
-      throw new Error('Expected an open angle bracket');
+    if (!match(S.TOKENS.OpenParenthesis)) {
+      raise('Expected an open parenthesis');
     }
 
     const message = parseIdentifier(AST.NODES.Identifier);
 
-    if (!match(S.TOKENS.CloseAngleBracket)) {
-      throw new Error('Expected a close angle bracket');
+    if (!match(S.TOKENS.CloseParenthesis)) {
+      raise('Expected a close parenthesis');
     }
 
     return AST.buildNode(AST.NODES.ReceiveMessage, {
@@ -229,7 +243,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
     } else if (check(S.TOKENS.Identifier)) {
       return parseIdentifier(AST.NODES.Identifier);
     } else {
-      throw new Error('Unexpected message type');
+      raise('Unexpected message type');
     }
   }
 
@@ -241,21 +255,21 @@ function parse(tokens: readonly S.Token[]): AST.Program {
     while (check(S.TOKENS.OpenBracket)) {
       // open bracket
       if (!match(S.TOKENS.OpenBracket)) {
-        throw new Error('Expected an open bracket');
+        raise('Expected an open bracket');
       }
 
       const channel_1 = parseIdentifier(AST.NODES.Identifier);
 
       // equal
       if (!match(S.TOKENS.Equal)) {
-        throw new Error('Expected an equal sign');
+        raise('Expected an equal sign');
       }
 
       const channel_2 = parseIdentifier(AST.NODES.Identifier);
 
       // closed bracket
       if (!match(S.TOKENS.CloseBracket)) {
-        throw new Error('Expected a close bracket');
+        raise('Expected a close bracket');
       }
 
       matches.push(
@@ -298,7 +312,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     while (check(S.TOKENS.Plus)) {
       if (!match(S.TOKENS.Plus)) {
-        throw new Error('Expected a plus');
+        raise('Expected a plus');
       }
 
       parallelCompositions.push(parseParallelComposition());
@@ -324,11 +338,13 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
     while (check(S.TOKENS.VerticalBar)) {
       if (!match(S.TOKENS.VerticalBar)) {
-        throw new Error('Expected a vertical bar');
+        raise('Expected a vertical bar');
       }
 
       processes.push(parseRRp());
     }
+
+    console.log({ processes })
 
     return AST.buildNode(AST.NODES.ParallelComposition, {
       position: new Position(
@@ -342,11 +358,16 @@ function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parseRRp(): AST.Process {
-    // RRp -> Replication |  Restriction | primary
+    // RRp -> Replication | Restriction | primary
 
     if (check(S.TOKENS.Bang)) {
       return parseReplication();
-    } else if (check(S.TOKENS.OpenParenthesis)) {
+    } else if (
+      check(S.TOKENS.OpenParenthesis) &&
+      check(S.TOKENS.Identifier, 1) &&
+      check(S.TOKENS.CloseParenthesis, 2)
+    ) {
+      // disambiguate between 'primary = (Process' vs Restriction
       return parseRestriction();
     } else {
       return parsePrimary();
@@ -379,12 +400,19 @@ function parse(tokens: readonly S.Token[]): AST.Program {
     let firstOpenParenthesis: S.OpenParenthesis;
     do {
       const op = parseOpenParenthesis();
-      firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
+      !firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
+
+      // TODO: check(S.TOKENS.Identifier) not enough
+      if (!check(S.TOKENS.Identifier) || !check(S.TOKENS.CloseParenthesis, 1)) {
+        // disambiguate between '(as)(bs)(A | S | B)' vs '(as)(bs)(cs)' vs '(as)(bs)(A)'
+        back();
+        break;
+      }
 
       identifiers.push(parseIdentifier(AST.NODES.Identifier));
 
       if (!match(S.TOKENS.CloseParenthesis)) {
-        throw new Error('Expected a close parenthesis');
+        raise('Expected a close parenthesis');
       }
     } while (check(S.TOKENS.OpenParenthesis));
 
@@ -434,7 +462,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
         position: nil.position,
       });
     } else {
-      throw new Error('Expected a nil process');
+      raise('Expected a nil process');
     }
   }
 
@@ -448,7 +476,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
     tag: typeof AST.NODES.Identifier | typeof AST.NODES.ProcessConstant,
   ): AST.Identifier | AST.ProcessConstant {
     if (!check(S.TOKENS.Identifier)) {
-      throw new Error('Expected an identifier');
+      raise('Expected an identifier');
     }
 
     const identifier = advance() as S.Identifier;
@@ -457,14 +485,14 @@ function parse(tokens: readonly S.Token[]): AST.Program {
       tag === AST.NODES.ProcessConstant &&
       identifier.value.toUpperCase() !== identifier.value
     ) {
-      throw new Error('Process identifiers must be uppercase');
+      raise('Process identifiers must be uppercase');
     }
 
     if (
       tag === AST.NODES.Identifier &&
       identifier.value.toLowerCase() !== identifier.value
     ) {
-      throw new Error('Non-process identifiers must be lowercase');
+      raise('Non-process identifiers must be lowercase');
     }
 
     return AST.buildNode(tag, {
@@ -475,7 +503,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseStringLiteral(): AST.StringLiteral {
     if (!check(S.TOKENS.StringLiteral)) {
-      throw new Error('Expected a string literal');
+      raise('Expected a string literal');
     }
 
     const stringLiteral = advance() as S.StringLiteral;
@@ -488,7 +516,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseNumberLiteral(): AST.NumberLiteral {
     if (!check(S.TOKENS.NumberLiteral)) {
-      throw new Error('Expected a number literal');
+      raise('Expected a number literal');
     }
 
     const numberLiteral = advance() as S.NumberLiteral;
@@ -501,7 +529,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseSemicolon(): S.Semicolon {
     if (!check(S.TOKENS.Semicolon)) {
-      throw new Error('Expected a semicolon');
+      raise('Expected a semicolon');
     }
 
     return advance() as S.Semicolon;
@@ -509,7 +537,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseBang(): S.Bang {
     if (!check(S.TOKENS.Bang)) {
-      throw new Error('Expected a bang!');
+      raise('Expected a bang!');
     }
 
     return advance() as S.Bang;
@@ -517,7 +545,7 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseOpenParenthesis(): S.OpenParenthesis {
     if (!check(S.TOKENS.OpenParenthesis)) {
-      throw new Error('Expected an open parenthesis');
+      raise('Expected an open parenthesis');
     }
 
     return advance() as S.OpenParenthesis;
@@ -525,10 +553,17 @@ function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseCloseParenthesis(): S.CloseParenthesis {
     if (!check(S.TOKENS.CloseParenthesis)) {
-      throw new Error('Expected an close parenthesis');
+      raise('Expected an close parenthesis');
     }
 
     return advance() as S.CloseParenthesis;
+  }
+
+  // error
+  function raise(message: string) {
+    throw new Error(
+      `Error: ${message} at ${JSON.stringify(tokens[index].position)}`,
+    );
   }
 
   return parseProgram();
