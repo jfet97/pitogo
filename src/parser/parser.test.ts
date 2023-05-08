@@ -5,7 +5,7 @@ const ast = parse(
   scanner(`
     A = (ab)as<ab>.ab<m>.nil;
     S = !as(x).bs<x>.nil;
-    B = bs(y).y(w).nil;
+    B = bs(y).y(w).log<y>.log<w>.nil;
     main = (as)(bs)(A | S | B);
   `),
 );
@@ -20,7 +20,7 @@ const ast = parse(
 
 // serialize ast on a file called ast.json
 import { writeFileSync } from 'fs';
-writeFileSync('ast.json', JSON.stringify(ast, null, 2));
+writeFileSync('./src/parser/ast.json', JSON.stringify(ast, null, 2));
 
 // console.log(
 //   scanner(`

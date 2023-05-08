@@ -5,7 +5,9 @@ import { Resolve } from '../utils/index.js';
 export const TOKENS = {
   Nil: 'Nil',
   Main: 'Main',
+  Log: 'Log',
   Identifier: 'Identifier',
+  ProcessConstant: 'ProcessConstant',
   NumberLiteral: 'NumberLiteral',
   StringLiteral: 'StringLiteral',
   Dot: 'Dot',
@@ -32,8 +34,18 @@ export class Main {
   constructor(public position: Position) {}
 }
 
+export class Log {
+  _tag = TOKENS.Log;
+  constructor(public position: Position) {}
+}
+
 export class Identifier {
   _tag = TOKENS.Identifier;
+  constructor(public position: Position, public value: string) {}
+}
+
+export class ProcessConstant {
+  _tag = TOKENS.ProcessConstant;
   constructor(public position: Position, public value: string) {}
 }
 
@@ -110,7 +122,9 @@ export class CloseAngleBracket {
 export type Token =
   | Nil
   | Main
+  | Log
   | Identifier
+  | ProcessConstant
   | NumberLiteral
   | StringLiteral
   | Dot
@@ -137,8 +151,16 @@ export function buildToken<TAG extends Token['_tag']>(
       return new Nil(position) as Extract<Token, { _tag: TAG }>;
     case TOKENS.Main:
       return new Main(position) as Extract<Token, { _tag: TAG }>;
+    case TOKENS.Log:
+      return new Log(position) as Extract<Token, { _tag: TAG }>;
     case TOKENS.Identifier:
       return new Identifier(
+        position,
+        // @ts-expect-error it cannot narrow down the type
+        args.value,
+      ) as Extract<Token, { _tag: TAG }>;
+    case TOKENS.ProcessConstant:
+      return new ProcessConstant(
         position,
         // @ts-expect-error it cannot narrow down the type
         args.value,

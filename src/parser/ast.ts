@@ -5,6 +5,7 @@ export const NODES = {
   Program: 'Program',
   Declaration: 'Declaration',
   Main: 'Main',
+  Log: 'Log',
   SendMessage: 'SendMessage',
   ReceiveMessage: 'ReceiveMessage',
   InactiveProcess: 'InactiveProcess',
@@ -41,6 +42,11 @@ export class Declaration {
 export class Main {
   _tag = NODES.Main;
   constructor(public position: Position, public process: Process) {}
+}
+
+export class Log {
+  _tag = NODES.Log;
+  constructor(public position: Position, public message: Message) {}
 }
 
 export class SendMessage {
@@ -131,7 +137,7 @@ export class Replication {
 
 export type Message = StringLiteral | NumberLiteral | Identifier;
 
-export type Prefix = SendMessage | ReceiveMessage;
+export type Prefix = Log | SendMessage | ReceiveMessage;
 
 export type Process =
   | InactiveProcess
@@ -149,6 +155,7 @@ export type Node =
   | Main
   | SendMessage
   | ReceiveMessage
+  | Log
   | InactiveProcess
   | ProcessConstant
   | Identifier
@@ -187,6 +194,10 @@ export function buildNode<NODE extends Node['_tag']>(
     case NODES.ReceiveMessage: {
       // @ts-expect-error it cannot narrow down the type
       return new ReceiveMessage(position, args.channel, args.message);
+    }
+    case NODES.Log: {
+      // @ts-expect-error it cannot narrow down the type
+      return new Log(position, args.message);
     }
     case NODES.InactiveProcess: {
       // @ts-expect-error it cannot narrow down the type

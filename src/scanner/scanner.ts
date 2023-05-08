@@ -1,7 +1,7 @@
 import { Position } from '../common/Position.js';
 import { TOKENS, Token, buildToken } from './tokens.js';
 
-const KEYWORDS = ['nil', 'main'];
+const KEYWORDS = ['nil', 'main', 'log'];
 
 export function scanner(input: string): Token[] {
   const toRet = [];
@@ -154,9 +154,19 @@ export function scanner(input: string): Token[] {
               addToken(TOKENS.Nil);
             } else if (identifier === 'main') {
               addToken(TOKENS.Main);
+            } else if (identifier === 'log') {
+              addToken(TOKENS.Log);
             }
           } else {
-            addToken(TOKENS.Identifier, identifier);
+            if (identifier.toLowerCase() === identifier) {
+              addToken(TOKENS.Identifier, identifier);
+            } else if (identifier.toUpperCase() === identifier) {
+              addToken(TOKENS.ProcessConstant, identifier);
+            } else {
+              throw new Error(
+                `Unexpected identifier: ${identifier}. Use only lowercase for channels and messages, uppercase for process constants`,
+              );
+            }
           }
         } else {
           throw new Error(`Unexpected character: ${char}`);

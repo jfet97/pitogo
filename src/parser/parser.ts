@@ -51,7 +51,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     // Declaration -> ProcessIdentifier TOKENS.Equal Process TOKENS.Semicolon
 
     // identifier
-    const identifier = parseIdentifier(AST.NODES.ProcessConstant);
+    const processConstant = parseProcessConstant();
 
     // equal
     if (!match(S.TOKENS.Equal)) {
@@ -67,14 +67,14 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     // result
     return AST.buildNode(AST.NODES.Declaration, {
       position: new Position(
-        identifier.position.row_start,
+        processConstant.position.row_start,
         semicolon.position.row_end,
-        identifier.position.column_start,
+        processConstant.position.column_start,
         semicolon.position.column_end,
       ),
       identifier: AST.buildNode(AST.NODES.ProcessConstant, {
-        position: identifier.position,
-        identifier: identifier.identifier,
+        position: processConstant.position,
+        identifier: processConstant.identifier,
       }),
       process,
     });
@@ -120,18 +120,8 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
     const prefixes: AST.ActionPrefix[] = [];
 
-    console.log(tokens[index]);
-
     // (Prefix TOKEN.Dot)*
     while (check(S.TOKENS.Identifier)) {
-      // TODO: disambiguate (as vs (A that is a Matching
-      try {
-        parseIdentifier(AST.NODES.Identifier);
-        back();
-      } catch (e) {
-        break;
-      }
-
       const prefix = parsePrefix();
 
       if (!match(S.TOKENS.Dot)) {
@@ -170,9 +160,11 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parsePrefix(): AST.Prefix {
-    // Prefix -> SendMessage | ReceiveMessage
+    // Prefix ->  Log | SendMessage | ReceiveMessage
 
-    if (check(S.TOKENS.OpenAngleBracket, 1)) {
+    if (check(S.TOKENS.Log)) {
+      return parseLog();
+    } else if (check(S.TOKENS.OpenAngleBracket, 1)) {
       return parseSendMessage();
     } else if (check(S.TOKENS.OpenParenthesis, 1)) {
       return parseReceiveMessage();
@@ -183,7 +175,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
   function parseSendMessage(): AST.SendMessage {
     // SendMessage -> Identifier TOKENS.OpenAngleBracker Message TOKENS.CloseAngleBracket
-    const channel = parseIdentifier(AST.NODES.Identifier);
+    const channel = parseIdentifier();
 
     if (!match(S.TOKENS.OpenAngleBracket)) {
       raise('Expected an open angle bracket');
@@ -191,16 +183,14 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
     const message = parseMessage();
 
-    if (!match(S.TOKENS.CloseAngleBracket)) {
-      raise('Expected a close angle bracket');
-    }
+    const closeAngleBracket = parseCloseAngleBracket();
 
     return AST.buildNode(AST.NODES.SendMessage, {
       position: new Position(
         channel.position.row_start,
-        message.position.row_end,
+        closeAngleBracket.position.row_end,
         channel.position.column_start,
-        message.position.column_end,
+        closeAngleBracket.position.column_end,
       ),
       channel,
       message,
@@ -209,13 +199,13 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   function parseReceiveMessage(): AST.ReceiveMessage {
     // ReceiveMessage -> Identifier TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis
 
-    const channel = parseIdentifier(AST.NODES.Identifier);
+    const channel = parseIdentifier();
 
     if (!match(S.TOKENS.OpenParenthesis)) {
       raise('Expected an open parenthesis');
     }
 
-    const message = parseIdentifier(AST.NODES.Identifier);
+    const message = parseIdentifier();
 
     if (!match(S.TOKENS.CloseParenthesis)) {
       raise('Expected a close parenthesis');
@@ -241,7 +231,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     } else if (check(S.TOKENS.NumberLiteral)) {
       return parseNumberLiteral();
     } else if (check(S.TOKENS.Identifier)) {
-      return parseIdentifier(AST.NODES.Identifier);
+      return parseIdentifier();
     } else {
       raise('Unexpected message type');
     }
@@ -258,14 +248,14 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
         raise('Expected an open bracket');
       }
 
-      const channel_1 = parseIdentifier(AST.NODES.Identifier);
+      const channel_1 = parseIdentifier();
 
       // equal
       if (!match(S.TOKENS.Equal)) {
         raise('Expected an equal sign');
       }
 
-      const channel_2 = parseIdentifier(AST.NODES.Identifier);
+      const channel_2 = parseIdentifier();
 
       // closed bracket
       if (!match(S.TOKENS.CloseBracket)) {
@@ -344,7 +334,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       processes.push(parseRRp());
     }
 
-    console.log({ processes })
+    console.log({ processes });
 
     return AST.buildNode(AST.NODES.ParallelComposition, {
       position: new Position(
@@ -402,14 +392,13 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       const op = parseOpenParenthesis();
       !firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
 
-      // TODO: check(S.TOKENS.Identifier) not enough
       if (!check(S.TOKENS.Identifier) || !check(S.TOKENS.CloseParenthesis, 1)) {
         // disambiguate between '(as)(bs)(A | S | B)' vs '(as)(bs)(cs)' vs '(as)(bs)(A)'
         back();
         break;
       }
 
-      identifiers.push(parseIdentifier(AST.NODES.Identifier));
+      identifiers.push(parseIdentifier());
 
       if (!match(S.TOKENS.CloseParenthesis)) {
         raise('Expected a close parenthesis');
@@ -436,8 +425,8 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
     if (check(S.TOKENS.Nil)) {
       return parseInactiveProcess();
-    } else if (check(S.TOKENS.Identifier)) {
-      return parseIdentifier(AST.NODES.ProcessConstant);
+    } else if (check(S.TOKENS.ProcessConstant)) {
+      return parseProcessConstant();
     } else if (check(S.TOKENS.OpenParenthesis)) {
       const openParenthesis = parseOpenParenthesis();
       const process = parseProcess();
@@ -450,6 +439,34 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
       return process;
     }
+  }
+
+  function parseLog(): AST.Log {
+    // Log -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
+
+    if (!check(S.TOKENS.Log)) {
+      raise('Expected a log');
+    }
+
+    const log = advance() as S.Log;
+
+    if (!match(S.TOKENS.OpenAngleBracket)) {
+      raise('Expected an open angle bracket');
+    }
+
+    const message = parseMessage();
+
+    const closeAngleBracket = parseCloseAngleBracket();
+
+    return AST.buildNode(AST.NODES.Log, {
+      position: new Position(
+        log.position.row_start,
+        closeAngleBracket.position.row_end,
+        log.position.column_start,
+        closeAngleBracket.position.column_end,
+      ),
+      message,
+    });
   }
 
   function parseInactiveProcess(): AST.InactiveProcess {
@@ -468,36 +485,29 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
   // utils
 
-  function parseIdentifier(tag: typeof AST.NODES.Identifier): AST.Identifier;
-  function parseIdentifier(
-    tag: typeof AST.NODES.ProcessConstant,
-  ): AST.ProcessConstant;
-  function parseIdentifier(
-    tag: typeof AST.NODES.Identifier | typeof AST.NODES.ProcessConstant,
-  ): AST.Identifier | AST.ProcessConstant {
+  function parseIdentifier(): AST.Identifier {
     if (!check(S.TOKENS.Identifier)) {
       raise('Expected an identifier');
     }
 
     const identifier = advance() as S.Identifier;
 
-    if (
-      tag === AST.NODES.ProcessConstant &&
-      identifier.value.toUpperCase() !== identifier.value
-    ) {
-      raise('Process identifiers must be uppercase');
-    }
-
-    if (
-      tag === AST.NODES.Identifier &&
-      identifier.value.toLowerCase() !== identifier.value
-    ) {
-      raise('Non-process identifiers must be lowercase');
-    }
-
-    return AST.buildNode(tag, {
+    return AST.buildNode(AST.NODES.Identifier, {
       position: identifier.position,
       identifier: identifier.value,
+    });
+  }
+
+  function parseProcessConstant(): AST.ProcessConstant {
+    if (!check(S.TOKENS.ProcessConstant)) {
+      raise('Expected a process constant');
+    }
+
+    const processConstant = advance() as S.ProcessConstant;
+
+    return AST.buildNode(AST.NODES.ProcessConstant, {
+      position: processConstant.position,
+      identifier: processConstant.value,
     });
   }
 
@@ -559,8 +569,16 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     return advance() as S.CloseParenthesis;
   }
 
+  function parseCloseAngleBracket(): S.CloseAngleBracket {
+    if (!check(S.TOKENS.CloseAngleBracket)) {
+      raise('Expected a close angle bracket');
+    }
+
+    return advance() as S.CloseAngleBracket;
+  }
+
   // error
-  function raise(message: string) {
+  function raise(message: string): never {
     throw new Error(
       `Error: ${message} at ${JSON.stringify(tokens[index].position)}`,
     );
