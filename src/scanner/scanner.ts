@@ -1,7 +1,7 @@
 import { Position } from '../common/Position.js';
-import { TAGS, Token, buildToken } from './tokens.js';
+import { TOKENS, Token, buildToken } from './tokens.js';
 
-const KEYWORDS = ['nil'];
+const KEYWORDS = ['nil', 'main'];
 
 export function scanner(input: string): Token[] {
   const toRet = [];
@@ -47,51 +47,51 @@ export function scanner(input: string): Token[] {
 
     switch (char) {
       case '.': {
-        addToken(TAGS.Dot);
+        addToken(TOKENS.Dot);
         break;
       }
       case '=': {
-        addToken(TAGS.Equal);
+        addToken(TOKENS.Equal);
         break;
       }
       case '+': {
-        addToken(TAGS.Plus);
+        addToken(TOKENS.Plus);
         break;
       }
       case '!': {
-        addToken(TAGS.Bang);
+        addToken(TOKENS.Bang);
         break;
       }
       case '|': {
-        addToken(TAGS.VerticalBar);
+        addToken(TOKENS.VerticalBar);
         break;
       }
       case ';': {
-        addToken(TAGS.Semicolon);
+        addToken(TOKENS.Semicolon);
         break;
       }
       case '(': {
-        addToken(TAGS.OpenParenthesis);
+        addToken(TOKENS.OpenParenthesis);
         break;
       }
       case ')': {
-        addToken(TAGS.CloseParenthesis);
+        addToken(TOKENS.CloseParenthesis);
         break;
       }
       case '[': {
-        addToken(TAGS.OpenBracket);
+        addToken(TOKENS.OpenBracket);
         break;
       }
       case ']': {
-        addToken(TAGS.CloseBracket);
+        addToken(TOKENS.CloseBracket);
         break;
       }
       case '<': {
-        addToken(TAGS.OpenAngleBracket);
+        addToken(TOKENS.OpenAngleBracket);
         break;
       }
       case '>': {
-        addToken(TAGS.CloseAngleBracket);
+        addToken(TOKENS.CloseAngleBracket);
         break;
       }
       case '"': {
@@ -106,7 +106,7 @@ export function scanner(input: string): Token[] {
 
         // the closing "
         advance();
-        addToken(TAGS.StringLiteral, input.slice(start + 1, index - 1));
+        addToken(TOKENS.StringLiteral, input.slice(start + 1, index - 1));
         break;
       }
 
@@ -139,7 +139,7 @@ export function scanner(input: string): Token[] {
             }
           }
 
-          addToken(TAGS.NumberLiteral, Number(input.slice(start, index)));
+          addToken(TOKENS.NumberLiteral, Number(input.slice(start, index)));
         } else if (/[a-zA-Z_]/.test(char)) {
           // handle identifiers and keywords
 
@@ -150,9 +150,9 @@ export function scanner(input: string): Token[] {
           const identifier = input.slice(start, index);
 
           if (KEYWORDS.includes(identifier)) {
-            addToken(TAGS.Nil);
+            addToken(TOKENS.Nil);
           } else {
-            addToken(TAGS.Identifier, identifier);
+            addToken(TOKENS.Identifier, identifier);
           }
         } else {
           throw new Error(`Unexpected character: ${char}`);

@@ -2,8 +2,9 @@
 import { Position } from '../common/Position.js';
 import { Resolve } from '../utils/index.js';
 
-export const TAGS = {
+export const TOKENS = {
   Nil: 'Nil',
+  Main: 'Main',
   Identifier: 'Identifier',
   NumberLiteral: 'NumberLiteral',
   StringLiteral: 'StringLiteral',
@@ -22,87 +23,93 @@ export const TAGS = {
 } as const;
 
 export class Nil {
-  _tag = TAGS.Nil;
+  _tag = TOKENS.Nil;
+  constructor(public position: Position) {}
+}
+
+export class Main {
+  _tag = TOKENS.Main;
   constructor(public position: Position) {}
 }
 
 export class Identifier {
-  _tag = TAGS.Identifier;
+  _tag = TOKENS.Identifier;
   constructor(public position: Position, public value: string) {}
 }
 
 export class NumberLiteral {
-  _tag = TAGS.NumberLiteral;
+  _tag = TOKENS.NumberLiteral;
   constructor(public position: Position, public value: number) {}
 }
 
 export class StringLiteral {
-  _tag = TAGS.StringLiteral;
+  _tag = TOKENS.StringLiteral;
   constructor(public position: Position, public value: string) {}
 }
 
 export class Dot {
-  _tag = TAGS.Dot;
+  _tag = TOKENS.Dot;
   constructor(public position: Position) {}
 }
 
 export class Equal {
-  _tag = TAGS.Equal;
+  _tag = TOKENS.Equal;
   constructor(public position: Position) {}
 }
 
 export class Plus {
-  _tag = TAGS.Plus;
+  _tag = TOKENS.Plus;
   constructor(public position: Position) {}
 }
 
 export class Bang {
-  _tag = TAGS.Bang;
+  _tag = TOKENS.Bang;
   constructor(public position: Position) {}
 }
 
 export class VerticalBar {
-  _tag = TAGS.VerticalBar;
+  _tag = TOKENS.VerticalBar;
   constructor(public position: Position) {}
 }
 
 export class Semicolon {
-  _tag = TAGS.Semicolon;
+  _tag = TOKENS.Semicolon;
   constructor(public position: Position) {}
 }
 
 export class OpenParenthesis {
-  _tag = TAGS.OpenParenthesis;
+  _tag = TOKENS.OpenParenthesis;
   constructor(public position: Position) {}
 }
 
 export class CloseParenthesis {
-  _tag = TAGS.CloseParenthesis;
+  _tag = TOKENS.CloseParenthesis;
   constructor(public position: Position) {}
 }
 
 export class OpenBracket {
-  _tag = TAGS.OpenBracket;
+  _tag = TOKENS.OpenBracket;
   constructor(public position: Position) {}
 }
 
 export class CloseBracket {
-  _tag = TAGS.CloseBracket;
+  _tag = TOKENS.CloseBracket;
   constructor(public position: Position) {}
 }
 
 export class OpenAngleBracket {
-  _tag = TAGS.OpenAngleBracket;
+  _tag = TOKENS.OpenAngleBracket;
   constructor(public position: Position) {}
 }
 
 export class CloseAngleBracket {
-  _tag = TAGS.CloseAngleBracket;
+  _tag = TOKENS.CloseAngleBracket;
   constructor(public position: Position) {}
 }
 
 export type Token =
   | Nil
+  | Main
   | Identifier
   | NumberLiteral
   | StringLiteral
@@ -126,15 +133,17 @@ export function buildToken<TAG extends Token['_tag']>(
 ): Extract<Token, { _tag: TAG }> {
   const position = args.position;
   switch (tag) {
-    case TAGS.Nil:
+    case TOKENS.Nil:
       return new Nil(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.Identifier:
+    case TOKENS.Main:
+      return new Main(position) as Extract<Token, { _tag: TAG }>;
+    case TOKENS.Identifier:
       return new Identifier(
         position,
         // @ts-expect-error it cannot narrow down the type
         args.value,
       ) as Extract<Token, { _tag: TAG }>;
-    case TAGS.NumberLiteral:
+    case TOKENS.NumberLiteral:
       return new NumberLiteral(
         position,
         // @ts-expect-error it cannot narrow down the type
@@ -146,29 +155,29 @@ export function buildToken<TAG extends Token['_tag']>(
         // @ts-expect-error it cannot narrow down the type
         args.value,
       ) as Extract<Token, { _tag: TAG }>;
-    case TAGS.Dot:
+    case TOKENS.Dot:
       return new Dot(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.Equal:
+    case TOKENS.Equal:
       return new Equal(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.Plus:
+    case TOKENS.Plus:
       return new Plus(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.Bang:
+    case TOKENS.Bang:
       return new Bang(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.VerticalBar:
+    case TOKENS.VerticalBar:
       return new VerticalBar(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.Semicolon:
+    case TOKENS.Semicolon:
       return new Semicolon(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.OpenParenthesis:
+    case TOKENS.OpenParenthesis:
       return new OpenParenthesis(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.CloseParenthesis:
+    case TOKENS.CloseParenthesis:
       return new CloseParenthesis(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.OpenBracket:
+    case TOKENS.OpenBracket:
       return new OpenBracket(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.CloseBracket:
+    case TOKENS.CloseBracket:
       return new CloseBracket(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.OpenAngleBracket:
+    case TOKENS.OpenAngleBracket:
       return new OpenAngleBracket(position) as Extract<Token, { _tag: TAG }>;
-    case TAGS.CloseAngleBracket:
+    case TOKENS.CloseAngleBracket:
       return new CloseAngleBracket(position) as Extract<Token, { _tag: TAG }>;
     default:
       throw new Error(`Unknown token tag: ${tag}`);
