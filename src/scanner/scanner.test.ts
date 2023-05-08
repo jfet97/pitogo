@@ -1,4 +1,4 @@
-import { lexer } from './lexer.js';
+import { lexer } from './scanner.js';
 
 console.log(
   lexer(`
