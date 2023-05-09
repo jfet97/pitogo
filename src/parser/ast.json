@@ -13,7 +13,7 @@
         "row_start": 2,
         "row_end": 2,
         "column_start": 5,
-        "column_end": 29
+        "column_end": 25
       },
       "identifier": {
         "_tag": "ProcessConstant",
@@ -31,7 +31,7 @@
           "row_start": 2,
           "row_end": 2,
           "column_start": 9,
-          "column_end": 28
+          "column_end": 24
         },
         "channels": [
           {
@@ -51,7 +51,7 @@
             "row_start": 2,
             "row_end": 2,
             "column_start": 13,
-            "column_end": 28
+            "column_end": 24
           },
           "prefix": {
             "_tag": "SendMessage",
@@ -88,7 +88,7 @@
               "row_start": 2,
               "row_end": 2,
               "column_start": 20,
-              "column_end": 28
+              "column_end": 24
             },
             "prefix": {
               "_tag": "SendMessage",
@@ -124,8 +124,8 @@
               "position": {
                 "row_start": 2,
                 "row_end": 2,
-                "column_start": 26,
-                "column_end": 28
+                "column_start": 20,
+                "column_end": 24
               }
             }
           }
@@ -138,7 +138,7 @@
         "row_start": 3,
         "row_end": 3,
         "column_start": 5,
-        "column_end": 25
+        "column_end": 21
       },
       "identifier": {
         "_tag": "ProcessConstant",
@@ -156,7 +156,7 @@
           "row_start": 3,
           "row_end": 3,
           "column_start": 9,
-          "column_end": 24
+          "column_end": 20
         },
         "process": {
           "_tag": "ActionPrefix",
@@ -164,7 +164,7 @@
             "row_start": 3,
             "row_end": 3,
             "column_start": 10,
-            "column_end": 24
+            "column_end": 20
           },
           "prefix": {
             "_tag": "ReceiveMessage",
@@ -201,7 +201,7 @@
               "row_start": 3,
               "row_end": 3,
               "column_start": 16,
-              "column_end": 24
+              "column_end": 20
             },
             "prefix": {
               "_tag": "SendMessage",
@@ -237,8 +237,8 @@
               "position": {
                 "row_start": 3,
                 "row_end": 3,
-                "column_start": 22,
-                "column_end": 24
+                "column_start": 16,
+                "column_end": 20
               }
             }
           }
@@ -251,7 +251,7 @@
         "row_start": 4,
         "row_end": 4,
         "column_start": 5,
-        "column_end": 37
+        "column_end": 33
       },
       "identifier": {
         "_tag": "ProcessConstant",
@@ -269,7 +269,7 @@
           "row_start": 4,
           "row_end": 4,
           "column_start": 9,
-          "column_end": 36
+          "column_end": 32
         },
         "prefix": {
           "_tag": "ReceiveMessage",
@@ -306,7 +306,7 @@
             "row_start": 4,
             "row_end": 4,
             "column_start": 15,
-            "column_end": 36
+            "column_end": 32
           },
           "prefix": {
             "_tag": "ReceiveMessage",
@@ -343,7 +343,7 @@
               "row_start": 4,
               "row_end": 4,
               "column_start": 20,
-              "column_end": 36
+              "column_end": 32
             },
             "prefix": {
               "_tag": "Log",
@@ -370,7 +370,7 @@
                 "row_start": 4,
                 "row_end": 4,
                 "column_start": 27,
-                "column_end": 36
+                "column_end": 32
               },
               "prefix": {
                 "_tag": "Log",
@@ -396,8 +396,8 @@
                 "position": {
                   "row_start": 4,
                   "row_end": 4,
-                  "column_start": 34,
-                  "column_end": 36
+                  "column_start": 27,
+                  "column_end": 32
                 }
               }
             }

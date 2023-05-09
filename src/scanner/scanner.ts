@@ -4,7 +4,7 @@ import { TOKENS, Token, buildToken } from './tokens.js';
 const KEYWORDS = ['nil', 'main', 'log'];
 
 export function scanner(input: string): Token[] {
-  const toRet = [];
+  const toRet: Token[] = [];
 
   let index = 0; // position in input
   let start = 0; // start of the current lexeme

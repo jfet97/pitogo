@@ -116,16 +116,22 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parseProcess(): AST.Process {
-    // Process -> (Prefix TOKEN.Dot)* Matching
+    // Process -> (Prefix TOKEN.Dot)* (Prefix | Matching)
 
     const prefixes: AST.ActionPrefix[] = [];
 
-    // (Prefix TOKEN.Dot)*
-    while (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) {
+    let shouldParseMatching = true;
+
+    while (
+      (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) &&
+      shouldParseMatching
+    ) {
       const prefix = parsePrefix();
 
-      if (!match(S.TOKENS.Dot)) {
-        raise('Expected a dot');
+      if (!check(S.TOKENS.Dot)) {
+        shouldParseMatching = false;
+      } else {
+        match(S.TOKENS.Dot);
       }
 
       prefixes.push(
@@ -138,25 +144,43 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
             prefix.position.column_end,
           ),
           prefix,
-          process: null, // <-  temp
+          process: null as unknown as AST.Process, // <-  temp
         }),
       );
     }
 
-    // "matching"
-    const matching = parseMatching();
+    let matching: AST.Process | null = null;
 
-    // align action prefixes
-    prefixes.reduceRight<AST.Process>((process, actionPrefix) => {
-      actionPrefix.process = process;
+    if (shouldParseMatching) {
+      // "matching"
+      matching = parseMatching();
+    } else {
+      // last prefix has not the consecutive process
+      prefixes[prefixes.length - 1].process = AST.buildNode(
+        AST.NODES.InactiveProcess,
+        {
+          position: prefixes[prefixes.length - 1].prefix.position,
+        },
+      );
+    }
 
-      actionPrefix.position.column_end = process.position.column_end;
-      actionPrefix.position.row_end = process.position.row_end;
+    prefixes.reduceRight((process, actionPrefix) => {
+      if (process) {
+        actionPrefix.process = process;
+
+        actionPrefix.position.column_end = process.position.column_end;
+        actionPrefix.position.row_end = process.position.row_end;
+      }
 
       return actionPrefix;
     }, matching);
 
-    return prefixes.length ? prefixes[0] : matching;
+    // by construction prefixes.length > 0 or matching !== null
+    if (prefixes[0]) {
+      return prefixes[0];
+    } else {
+      return matching!;
+    }
   }
 
   function parsePrefix(): AST.Prefix {
@@ -294,7 +318,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
         AST.buildNode(AST.NODES.Matching, {
           left: channel_1,
           right: channel_2,
-          process: null, // temp
+          process: null as unknown as AST.Process, // temp
           // temp
           position: new Position(
             channel_1.position.row_start,
@@ -413,7 +437,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
     const identifiers: AST.Identifier[] = [];
 
-    let firstOpenParenthesis: S.OpenParenthesis;
+    let firstOpenParenthesis: S.OpenParenthesis | null = null;
     do {
       const op = parseOpenParenthesis();
       !firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
@@ -464,6 +488,8 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       process.position.column_end = closeParenthesis.position.column_end;
 
       return process;
+    } else {
+      raise('Unexpected primary type');
     }
   }
 
