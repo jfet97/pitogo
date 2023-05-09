@@ -2,9 +2,9 @@
   "_tag": "Program",
   "position": {
     "row_start": 2,
-    "row_end": 3,
+    "row_end": 5,
     "column_start": 5,
-    "column_end": 13
+    "column_end": 29
   },
   "declarations": [
     {
@@ -13,7 +13,7 @@
         "row_start": 2,
         "row_end": 2,
         "column_start": 5,
-        "column_end": 29
+        "column_end": 25
       },
       "identifier": {
         "_tag": "ProcessConstant",
@@ -26,151 +26,476 @@
         "identifier": "A"
       },
       "process": {
-        "_tag": "ParallelComposition",
+        "_tag": "Restriction",
         "position": {
           "row_start": 2,
           "row_end": 2,
           "column_start": 9,
-          "column_end": 28
+          "column_end": 24
         },
-        "processes": [
+        "channels": [
           {
-            "_tag": "Restriction",
+            "_tag": "Identifier",
             "position": {
               "row_start": 2,
               "row_end": 2,
-              "column_start": 9,
-              "column_end": 24
+              "column_start": 10,
+              "column_end": 11
             },
-            "channels": [
-              {
-                "_tag": "Identifier",
-                "position": {
-                  "row_start": 2,
-                  "row_end": 2,
-                  "column_start": 10,
-                  "column_end": 11
-                },
-                "identifier": "ab"
-              }
-            ],
-            "process": {
-              "_tag": "ActionPrefix",
+            "identifier": "ab"
+          }
+        ],
+        "process": {
+          "_tag": "ActionPrefix",
+          "position": {
+            "row_start": 2,
+            "row_end": 2,
+            "column_start": 13,
+            "column_end": 24
+          },
+          "prefix": {
+            "_tag": "SendMessage",
+            "position": {
+              "row_start": 2,
+              "row_end": 2,
+              "column_start": 13,
+              "column_end": 18
+            },
+            "channel": {
+              "_tag": "Identifier",
               "position": {
                 "row_start": 2,
                 "row_end": 2,
                 "column_start": 13,
+                "column_end": 14
+              },
+              "identifier": "as"
+            },
+            "message": {
+              "_tag": "Identifier",
+              "position": {
+                "row_start": 2,
+                "row_end": 2,
+                "column_start": 16,
+                "column_end": 17
+              },
+              "identifier": "ab"
+            }
+          },
+          "process": {
+            "_tag": "ActionPrefix",
+            "position": {
+              "row_start": 2,
+              "row_end": 2,
+              "column_start": 20,
+              "column_end": 24
+            },
+            "prefix": {
+              "_tag": "SendMessage",
+              "position": {
+                "row_start": 2,
+                "row_end": 2,
+                "column_start": 20,
                 "column_end": 24
               },
-              "prefix": {
-                "_tag": "SendMessage",
-                "position": {
-                  "row_start": 2,
-                  "row_end": 2,
-                  "column_start": 13,
-                  "column_end": 18
-                },
-                "channel": {
-                  "_tag": "Identifier",
-                  "position": {
-                    "row_start": 2,
-                    "row_end": 2,
-                    "column_start": 13,
-                    "column_end": 14
-                  },
-                  "identifier": "as"
-                },
-                "message": {
-                  "_tag": "Identifier",
-                  "position": {
-                    "row_start": 2,
-                    "row_end": 2,
-                    "column_start": 16,
-                    "column_end": 17
-                  },
-                  "identifier": "ab"
-                }
-              },
-              "process": {
-                "_tag": "ActionPrefix",
+              "channel": {
+                "_tag": "Identifier",
                 "position": {
                   "row_start": 2,
                   "row_end": 2,
                   "column_start": 20,
+                  "column_end": 21
+                },
+                "identifier": "ab"
+              },
+              "message": {
+                "_tag": "Identifier",
+                "position": {
+                  "row_start": 2,
+                  "row_end": 2,
+                  "column_start": 23,
+                  "column_end": 23
+                },
+                "identifier": "m"
+              }
+            },
+            "process": {
+              "_tag": "InactiveProcess",
+              "position": {
+                "row_start": 2,
+                "row_end": 2,
+                "column_start": 20,
+                "column_end": 24
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "_tag": "Declaration",
+      "position": {
+        "row_start": 3,
+        "row_end": 3,
+        "column_start": 5,
+        "column_end": 21
+      },
+      "identifier": {
+        "_tag": "ProcessConstant",
+        "position": {
+          "row_start": 3,
+          "row_end": 3,
+          "column_start": 5,
+          "column_end": 5
+        },
+        "identifier": "S"
+      },
+      "process": {
+        "_tag": "Replication",
+        "position": {
+          "row_start": 3,
+          "row_end": 3,
+          "column_start": 9,
+          "column_end": 20
+        },
+        "process": {
+          "_tag": "ActionPrefix",
+          "position": {
+            "row_start": 3,
+            "row_end": 3,
+            "column_start": 10,
+            "column_end": 20
+          },
+          "prefix": {
+            "_tag": "ReceiveMessage",
+            "position": {
+              "row_start": 3,
+              "row_end": 3,
+              "column_start": 10,
+              "column_end": 13
+            },
+            "channel": {
+              "_tag": "Identifier",
+              "position": {
+                "row_start": 3,
+                "row_end": 3,
+                "column_start": 10,
+                "column_end": 11
+              },
+              "identifier": "as"
+            },
+            "message": {
+              "_tag": "Identifier",
+              "position": {
+                "row_start": 3,
+                "row_end": 3,
+                "column_start": 13,
+                "column_end": 13
+              },
+              "identifier": "x"
+            }
+          },
+          "process": {
+            "_tag": "ActionPrefix",
+            "position": {
+              "row_start": 3,
+              "row_end": 3,
+              "column_start": 16,
+              "column_end": 20
+            },
+            "prefix": {
+              "_tag": "SendMessage",
+              "position": {
+                "row_start": 3,
+                "row_end": 3,
+                "column_start": 16,
+                "column_end": 20
+              },
+              "channel": {
+                "_tag": "Identifier",
+                "position": {
+                  "row_start": 3,
+                  "row_end": 3,
+                  "column_start": 16,
+                  "column_end": 17
+                },
+                "identifier": "bs"
+              },
+              "message": {
+                "_tag": "Identifier",
+                "position": {
+                  "row_start": 3,
+                  "row_end": 3,
+                  "column_start": 19,
+                  "column_end": 19
+                },
+                "identifier": "x"
+              }
+            },
+            "process": {
+              "_tag": "InactiveProcess",
+              "position": {
+                "row_start": 3,
+                "row_end": 3,
+                "column_start": 16,
+                "column_end": 20
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "_tag": "Declaration",
+      "position": {
+        "row_start": 4,
+        "row_end": 4,
+        "column_start": 5,
+        "column_end": 33
+      },
+      "identifier": {
+        "_tag": "ProcessConstant",
+        "position": {
+          "row_start": 4,
+          "row_end": 4,
+          "column_start": 5,
+          "column_end": 5
+        },
+        "identifier": "B"
+      },
+      "process": {
+        "_tag": "ActionPrefix",
+        "position": {
+          "row_start": 4,
+          "row_end": 4,
+          "column_start": 9,
+          "column_end": 32
+        },
+        "prefix": {
+          "_tag": "ReceiveMessage",
+          "position": {
+            "row_start": 4,
+            "row_end": 4,
+            "column_start": 9,
+            "column_end": 12
+          },
+          "channel": {
+            "_tag": "Identifier",
+            "position": {
+              "row_start": 4,
+              "row_end": 4,
+              "column_start": 9,
+              "column_end": 10
+            },
+            "identifier": "bs"
+          },
+          "message": {
+            "_tag": "Identifier",
+            "position": {
+              "row_start": 4,
+              "row_end": 4,
+              "column_start": 12,
+              "column_end": 12
+            },
+            "identifier": "y"
+          }
+        },
+        "process": {
+          "_tag": "ActionPrefix",
+          "position": {
+            "row_start": 4,
+            "row_end": 4,
+            "column_start": 15,
+            "column_end": 32
+          },
+          "prefix": {
+            "_tag": "ReceiveMessage",
+            "position": {
+              "row_start": 4,
+              "row_end": 4,
+              "column_start": 15,
+              "column_end": 17
+            },
+            "channel": {
+              "_tag": "Identifier",
+              "position": {
+                "row_start": 4,
+                "row_end": 4,
+                "column_start": 15,
+                "column_end": 15
+              },
+              "identifier": "y"
+            },
+            "message": {
+              "_tag": "Identifier",
+              "position": {
+                "row_start": 4,
+                "row_end": 4,
+                "column_start": 17,
+                "column_end": 17
+              },
+              "identifier": "w"
+            }
+          },
+          "process": {
+            "_tag": "ActionPrefix",
+            "position": {
+              "row_start": 4,
+              "row_end": 4,
+              "column_start": 20,
+              "column_end": 32
+            },
+            "prefix": {
+              "_tag": "Log",
+              "position": {
+                "row_start": 4,
+                "row_end": 4,
+                "column_start": 20,
+                "column_end": 25
+              },
+              "message": {
+                "_tag": "Identifier",
+                "position": {
+                  "row_start": 4,
+                  "row_end": 4,
+                  "column_start": 24,
                   "column_end": 24
                 },
-                "prefix": {
-                  "_tag": "SendMessage",
-                  "position": {
-                    "row_start": 2,
-                    "row_end": 2,
-                    "column_start": 20,
-                    "column_end": 24
-                  },
-                  "channel": {
-                    "_tag": "Identifier",
-                    "position": {
-                      "row_start": 2,
-                      "row_end": 2,
-                      "column_start": 20,
-                      "column_end": 21
-                    },
-                    "identifier": "ab"
-                  },
-                  "message": {
-                    "_tag": "Identifier",
-                    "position": {
-                      "row_start": 2,
-                      "row_end": 2,
-                      "column_start": 23,
-                      "column_end": 23
-                    },
-                    "identifier": "m"
-                  }
+                "identifier": "y"
+              }
+            },
+            "process": {
+              "_tag": "ActionPrefix",
+              "position": {
+                "row_start": 4,
+                "row_end": 4,
+                "column_start": 27,
+                "column_end": 32
+              },
+              "prefix": {
+                "_tag": "Log",
+                "position": {
+                  "row_start": 4,
+                  "row_end": 4,
+                  "column_start": 27,
+                  "column_end": 32
                 },
-                "process": {
-                  "_tag": "InactiveProcess",
+                "message": {
+                  "_tag": "Identifier",
                   "position": {
-                    "row_start": 2,
-                    "row_end": 2,
-                    "column_start": 20,
-                    "column_end": 24
-                  }
+                    "row_start": 4,
+                    "row_end": 4,
+                    "column_start": 31,
+                    "column_end": 31
+                  },
+                  "identifier": "w"
+                }
+              },
+              "process": {
+                "_tag": "InactiveProcess",
+                "position": {
+                  "row_start": 4,
+                  "row_end": 4,
+                  "column_start": 27,
+                  "column_end": 32
                 }
               }
             }
-          },
-          {
-            "_tag": "ProcessConstant",
-            "position": {
-              "row_start": 2,
-              "row_end": 2,
-              "column_start": 28,
-              "column_end": 28
-            },
-            "identifier": "P"
           }
-        ]
+        }
       }
     }
   ],
   "main": {
     "_tag": "Main",
     "position": {
-      "row_start": 3,
-      "row_end": 3,
+      "row_start": 5,
+      "row_end": 5,
       "column_start": 5,
-      "column_end": 13
+      "column_end": 29
     },
     "process": {
-      "_tag": "ProcessConstant",
+      "_tag": "Restriction",
       "position": {
-        "row_start": 3,
-        "row_end": 3,
+        "row_start": 5,
+        "row_end": 5,
         "column_start": 12,
-        "column_end": 12
+        "column_end": 28
       },
-      "identifier": "A"
+      "channels": [
+        {
+          "_tag": "Identifier",
+          "position": {
+            "row_start": 5,
+            "row_end": 5,
+            "column_start": 13,
+            "column_end": 14
+          },
+          "identifier": "as"
+        },
+        {
+          "_tag": "Identifier",
+          "position": {
+            "row_start": 5,
+            "row_end": 5,
+            "column_start": 17,
+            "column_end": 18
+          },
+          "identifier": "bs"
+        }
+      ],
+      "process": {
+        "_tag": "NonDeterministicChoice",
+        "position": {
+          "row_start": 5,
+          "row_end": 5,
+          "column_start": 20,
+          "column_end": 28
+        },
+        "processes": [
+          {
+            "_tag": "ParallelComposition",
+            "position": {
+              "row_start": 5,
+              "row_end": 5,
+              "column_start": 20,
+              "column_end": 24
+            },
+            "processes": [
+              {
+                "_tag": "ProcessConstant",
+                "position": {
+                  "row_start": 5,
+                  "row_end": 5,
+                  "column_start": 20,
+                  "column_end": 20
+                },
+                "identifier": "A"
+              },
+              {
+                "_tag": "ProcessConstant",
+                "position": {
+                  "row_start": 5,
+                  "row_end": 5,
+                  "column_start": 24,
+                  "column_end": 24
+                },
+                "identifier": "S"
+              }
+            ]
+          },
+          {
+            "_tag": "ProcessConstant",
+            "position": {
+              "row_start": 5,
+              "row_end": 5,
+              "column_start": 28,
+              "column_end": 28
+            },
+            "identifier": "B"
+          }
+        ]
+      }
     }
   }
 }
