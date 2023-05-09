@@ -5,14 +5,14 @@ import {
 } from './clean.js';
 import { parse } from './index.js';
 
-// const ast = parse(
-//   scanner(`
-//     A = (ab)as<ab>.ab<m>.nil;
-//     S = !as(x).bs<x>.nil;
-//     B = bs(y).y(w).log<y>.log<w>;
-//     main = (as)(bs)(A | S | B);
-//   `),
-// );
+const ast = parse(
+  scanner(`
+    A = (ab)as<ab>.ab<m>.nil;
+    S = !as(x).bs<x>.nil;
+    B = bs(y).y(w).log<y>.log<w>;
+    main = (as)(bs)(A | S | B);
+  `),
+);
 
 // const ast = parse(
 //   scanner(`
@@ -30,11 +30,23 @@ import { parse } from './index.js';
 //   `),
 // );
 
-const ast = parse(
-  scanner(`
-    main = (as)(bs)(A | S + B);
-  `),
-);
+// const ast = parse(
+//   scanner(`
+//     main = (as)(bs)(A | S + B);
+//   `),
+// );
+
+// const ast = parse(
+//   scanner(`
+//     main = ((as)(bs)((A|(S)))) + B;
+//   `),
+// );
+
+// const ast = parse(
+//   scanner(`
+//     main = (as)(bs)(A|S) + B;
+//   `),
+// );
 
 // pruning done into AST
 // removeSingleParallelComposition(ast);
