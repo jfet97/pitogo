@@ -91,7 +91,7 @@ export function prettyPrint(curr: AST.Node, indent = 0): string {
     case AST.NODES.ParallelComposition: {
       currStr +=
         `${currSpace}Node: ${curr._tag}\n` +
-        `${currSpace}Processes:` +
+        `${currSpace}Processes:\n` +
         curr.processes
           .map((process) => prettyPrint(process, indent + 2))
           .join('\n');
@@ -100,7 +100,7 @@ export function prettyPrint(curr: AST.Node, indent = 0): string {
     case AST.NODES.NonDeterministicChoice: {
       currStr +=
         `${currSpace}Node: ${curr._tag}\n` +
-        `${currSpace}Processes:` +
+        `${currSpace}Processes:\n` +
         curr.processes
           .map((process) => prettyPrint(process, indent + 2))
           .join('\n');
