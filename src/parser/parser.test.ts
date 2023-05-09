@@ -5,39 +5,52 @@ import {
 } from './clean.js';
 import { parse } from './index.js';
 
-// const ast = parse(
-//   scanner(`
-//     A = (ab)as<ab>.ab<m>.nil;
-//     S = !as(x).bs<x>.nil;
-//     B = bs(y).y(w).log<y>.log<w>.nil;
-//     main = (as)(bs)(A | S | B);
-//   `),
-// );
-
 const ast = parse(
   scanner(`
-    A = (ab)as<ab>.ab<m>;
-    S = !as(x).bs<x>;
+    A = (ab)as<ab>.ab<m>.nil;
+    S = !as(x).bs<x>.nil;
     B = bs(y).y(w).log<y>.log<w>;
-    main = (as)(bs)A | S + B;
+    main = (as)(bs)(A | S | B);
   `),
 );
 
 // const ast = parse(
 //   scanner(`
-//     A = (ab)as<ab>.ab<m> | P;
+//     A = (ab)as<ab>.ab<m>;
+//     S = !as(x).bs<x>;
+//     B = bs(y).y(w).log<y>.log<w>;
+//     main = (as)(bs)A | S + B;
+//   `),
+// );
+
+// const ast = parse(
+//   scanner(`
+//     A = (ab)as<ab>.ab<m>.nil | P;
 //     main = A;
 //   `),
 // );
 
 // const ast = parse(
 //   scanner(`
-//     main = (as)(bs)A | S + B;
+//     main = (as)(bs)(A | S + B);
 //   `),
 // );
 
-removeSingleParallelComposition(ast);
-removeSingleNonDeterministicChoice(ast);
+// const ast = parse(
+//   scanner(`
+//     main = ((as)(bs)((A|(S)))) + B;
+//   `),
+// );
+
+// const ast = parse(
+//   scanner(`
+//     main = (as)(bs)(A|S) + B;
+//   `),
+// );
+
+// pruning done into AST
+// removeSingleParallelComposition(ast);
+// removeSingleNonDeterministicChoice(ast);
 
 console.log(prettyPrint(ast));
 

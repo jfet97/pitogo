@@ -135,6 +135,13 @@ export function prettyPrint(curr: AST.Node, indent = 0): string {
         prettyPrint(curr.process, indent + 2);
       break;
     }
+    case AST.NODES.Replication: {
+      currStr +=
+        `${currSpace}Node: ${curr._tag}\n` +
+        `${currSpace}Process:\n` +
+        prettyPrint(curr.process, indent + 2);
+      break;
+    }
   }
   return currStr;
 }

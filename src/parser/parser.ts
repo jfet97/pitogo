@@ -2,6 +2,25 @@ import { Position } from '../common/Position.js';
 import * as S from '../scanner/index.js';
 import * as AST from './ast.js';
 
+// :)
+// Program -> Declaration* Main
+// Declaration -> ProcessIdentifier TOKENS.Equal Process TOKENS.Semicolon
+// Main -> TOKENS.Main TOKENS.Equal Process TOKENS.Semicolon
+// Process -> Replication
+// Replication -> (TOKENS.Bang)* Restriction
+// Restriction -> (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)* ParallelComposition
+// ParallelComposition -> NonDeterministicChoice (TOKENS.VerticalBar NonDeterministicChoice)*
+// NonDeterministicChoice -> Matching (TOKENS.Plus Matching)*
+// Matching -> (TOKENS.OpenBracket Identifier TOKENS.Equal Identifier TOKENS.CloseBracket)* ActionPrefix
+// ActionPrefix -> (Prefix TOKEN.Dot)* (Prefix | primary)
+// Prefix ->  LogMessage | SendMessage | ReceiveMessage
+// SendMessage -> Identifier TOKENS.OpenAngleBracker Message TOKENS.CloseAngleBracket
+// ReceiveMessage -> Identifier TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis
+// LogMessage -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
+// Message -> StringLiteral | NumberLiteral | Identifier
+// primary -> InactiveProcess | ProcessConstant | TOKENS.OpenParenthesis Process TOKENS.CloseParenthesis
+// InactiveProcess -> TOKENS.Nil
+
 // LL(3) parser ???
 export function parse(tokens: readonly S.Token[]): AST.Program {
   let index = 0;
@@ -116,71 +135,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parseProcess(): AST.Process {
-    // Process -> (Prefix TOKEN.Dot)* (Prefix | Matching)
+    // Process -> Replication
 
-    const prefixes: AST.ActionPrefix[] = [];
-
-    let shouldParseMatching = true;
-
-    while (
-      (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) &&
-      shouldParseMatching
-    ) {
-      const prefix = parsePrefix();
-
-      if (!check(S.TOKENS.Dot)) {
-        shouldParseMatching = false;
-      } else {
-        match(S.TOKENS.Dot);
-      }
-
-      prefixes.push(
-        AST.buildNode(AST.NODES.ActionPrefix, {
-          // temp
-          position: new Position(
-            prefix.position.row_start,
-            prefix.position.row_end,
-            prefix.position.column_start,
-            prefix.position.column_end,
-          ),
-          prefix,
-          process: null as unknown as AST.Process, // <-  temp
-        }),
-      );
-    }
-
-    let matching: AST.Process | null = null;
-
-    if (shouldParseMatching) {
-      // "matching"
-      matching = parseMatching();
-    } else {
-      // last prefix has not the consecutive process
-      prefixes[prefixes.length - 1].process = AST.buildNode(
-        AST.NODES.InactiveProcess,
-        {
-          position: prefixes[prefixes.length - 1].prefix.position,
-        },
-      );
-    }
-
-    prefixes.reduceRight((process, actionPrefix) => {
-      if (process) {
-        actionPrefix.process = process;
-
-        actionPrefix.position.column_end = process.position.column_end;
-        actionPrefix.position.row_end = process.position.row_end;
-      }
-
-      return actionPrefix;
-    }, matching);
-
-    // by construction prefixes.length > 0 or matching !== null
-    if (prefixes[0]) {
-      return prefixes[0];
-    } else {
-      return matching!;
-    }
+    return parseReplication();
   }
 
   function parsePrefix(): AST.Prefix {
@@ -290,7 +247,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parseMatching(): AST.Process {
-    // Matching -> (TOKENS.OpenBracket Identifier TOKENS.Equal Identifier TOKENS.CloseBracket)* NonDeterministicChoice
+    // Matching -> (TOKENS.OpenBracket Identifier TOKENS.Equal Identifier TOKENS.CloseBracket)* ActionPrefix
 
     const matches: AST.Matching[] = [];
 
@@ -330,7 +287,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       );
     }
 
-    const process = parseNonDeterministicChoice();
+    const process = parseActionPrefix();
 
     // align matches
     matches.reduceRight<AST.Process>((process, match) => {
@@ -345,100 +302,159 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     return matches.length ? matches[0] : process;
   }
 
-  function parseNonDeterministicChoice(): AST.NonDeterministicChoice {
-    // NonDeterministicChoice -> ParallelComposition (TOKENS.Plus ParallelComposition)*
+  function parseNonDeterministicChoice(): AST.Process {
+    // NonDeterministicChoice -> Matching (TOKENS.Plus Matching)*
 
-    const parallelCompositions: AST.ParallelComposition[] = [
-      parseParallelComposition(),
-    ];
+    const matches: AST.Process[] = [parseMatching()];
 
     while (check(S.TOKENS.Plus)) {
       if (!match(S.TOKENS.Plus)) {
         raise('Expected a plus');
       }
 
-      parallelCompositions.push(parseParallelComposition());
+      matches.push(parseMatching());
     }
 
-    return AST.buildNode(AST.NODES.NonDeterministicChoice, {
-      position: new Position(
-        parallelCompositions[0].position.row_start,
-        parallelCompositions[parallelCompositions.length - 1].position.row_end,
-        parallelCompositions[0].position.column_start,
-        parallelCompositions[
-          parallelCompositions.length - 1
-        ].position.column_end,
-      ),
-      processes: parallelCompositions,
-    });
+    return matches.length >= 2
+      ? AST.buildNode(AST.NODES.NonDeterministicChoice, {
+          position: new Position(
+            matches[0].position.row_start,
+            matches[matches.length - 1].position.row_end,
+            matches[0].position.column_start,
+            matches[matches.length - 1].position.column_end,
+          ),
+          processes: matches,
+        })
+      : matches[0];
   }
 
-  function parseParallelComposition(): AST.ParallelComposition {
-    // ParallelComposition -> RRp (TOKENS.VerticalBar RRp)*
+  function parseParallelComposition(): AST.Process {
+    // ParallelComposition -> NonDeterministicChoice (TOKENS.VerticalBar NonDeterministicChoice)*
 
-    const processes: AST.Process[] = [parseRRp()];
+    const processes: AST.Process[] = [parseNonDeterministicChoice()];
 
     while (check(S.TOKENS.VerticalBar)) {
       if (!match(S.TOKENS.VerticalBar)) {
         raise('Expected a vertical bar');
       }
 
-      processes.push(parseRRp());
+      processes.push(parseNonDeterministicChoice());
     }
 
-    return AST.buildNode(AST.NODES.ParallelComposition, {
-      position: new Position(
-        processes[0].position.row_start,
-        processes[processes.length - 1].position.row_end,
-        processes[0].position.column_start,
-        processes[processes.length - 1].position.column_end,
-      ),
-      processes,
-    });
+    return processes.length >= 2
+      ? AST.buildNode(AST.NODES.ParallelComposition, {
+          position: new Position(
+            processes[0].position.row_start,
+            processes[processes.length - 1].position.row_end,
+            processes[0].position.column_start,
+            processes[processes.length - 1].position.column_end,
+          ),
+          processes,
+        })
+      : processes[0];
   }
 
-  function parseRRp(): AST.Process {
-    // RRp -> Replication | Restriction | primary
+  function parseActionPrefix(): AST.Process {
+    // ActionPrefix -> (Prefix TOKEN.Dot)* (Prefix | primary)
 
-    if (check(S.TOKENS.Bang)) {
-      return parseReplication();
-    } else if (
-      check(S.TOKENS.OpenParenthesis) &&
-      check(S.TOKENS.Identifier, 1) &&
-      check(S.TOKENS.CloseParenthesis, 2)
+    const prefixes: AST.ActionPrefix[] = [];
+
+    let shouldParsePrimary = true;
+
+    while (
+      (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) &&
+      shouldParsePrimary
     ) {
-      // disambiguate between 'primary = (Process' vs Restriction (ab)
-      return parseRestriction();
+      const prefix = parsePrefix();
+
+      if (!check(S.TOKENS.Dot)) {
+        shouldParsePrimary = false;
+      } else {
+        match(S.TOKENS.Dot);
+      }
+
+      prefixes.push(
+        AST.buildNode(AST.NODES.ActionPrefix, {
+          // temp
+          position: new Position(
+            prefix.position.row_start,
+            prefix.position.row_end,
+            prefix.position.column_start,
+            prefix.position.column_end,
+          ),
+          prefix,
+          process: null as unknown as AST.Process, // <-  temp
+        }),
+      );
+    }
+
+    let primary: AST.Process | null = null;
+
+    if (shouldParsePrimary) {
+      // "matching"
+      primary = parsePrimary();
     } else {
-      return parsePrimary();
+      // last prefix has not the consecutive process
+      prefixes[prefixes.length - 1].process = AST.buildNode(
+        AST.NODES.InactiveProcess,
+        {
+          position: prefixes[prefixes.length - 1].prefix.position,
+        },
+      );
+    }
+
+    prefixes.reduceRight((process, actionPrefix) => {
+      if (process) {
+        actionPrefix.process = process;
+
+        actionPrefix.position.column_end = process.position.column_end;
+        actionPrefix.position.row_end = process.position.row_end;
+      }
+
+      return actionPrefix;
+    }, primary);
+
+    // by construction prefixes.length > 0 or matching !== null
+    if (prefixes[0]) {
+      return prefixes[0];
+    } else {
+      return primary!;
     }
   }
 
-  function parseReplication(): AST.Replication {
-    // Replication -> TOKENS.Bang Process
+  function parseReplication(): AST.Process {
+    // Replication -> (TOKENS.Bang)* Restriction
 
-    const bang = parseBang();
+    let firstBang: S.Bang | null = null;
+    if (check(S.TOKENS.Bang)) {
+      firstBang = parseBang();
+    }
+    while (match(S.TOKENS.Bang));
 
-    const process = parseProcess();
+    const restriction = parseRestriction();
 
-    return AST.buildNode(AST.NODES.Replication, {
-      position: new Position(
-        bang.position.row_start,
-        process.position.row_end,
-        bang.position.column_start,
-        process.position.column_end,
-      ),
-      process,
-    });
+    return firstBang
+      ? AST.buildNode(AST.NODES.Replication, {
+          position: new Position(
+            firstBang?.position.row_start ?? restriction.position.row_start,
+            restriction.position.row_end,
+            firstBang?.position.column_start ??
+              restriction.position.column_start,
+            restriction.position.column_end,
+          ),
+          process: restriction,
+        })
+      : restriction;
   }
 
-  function parseRestriction(): AST.Restriction {
-    // Restriction -> (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)+ Process
+  function parseRestriction(): AST.Process {
+    // Restriction -> (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)* ParallelComposition
 
     const identifiers: AST.Identifier[] = [];
 
     let firstOpenParenthesis: S.OpenParenthesis | null = null;
-    do {
+
+    while (check(S.TOKENS.OpenParenthesis)) {
       const op = parseOpenParenthesis();
       !firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
 
@@ -453,20 +469,24 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       if (!match(S.TOKENS.CloseParenthesis)) {
         raise('Expected a close parenthesis');
       }
-    } while (check(S.TOKENS.OpenParenthesis));
+    }
 
-    const process = parseProcess();
+    const parallelComposition = parseParallelComposition();
 
-    return AST.buildNode(AST.NODES.Restriction, {
-      position: new Position(
-        firstOpenParenthesis.position.row_start,
-        process.position.row_end,
-        firstOpenParenthesis.position.column_start,
-        process.position.column_end,
-      ),
-      channels: identifiers,
-      process,
-    });
+    return firstOpenParenthesis
+      ? AST.buildNode(AST.NODES.Restriction, {
+          position: new Position(
+            firstOpenParenthesis?.position.row_start ??
+              parallelComposition.position.row_start,
+            parallelComposition.position.row_end,
+            firstOpenParenthesis?.position.column_start ??
+              parallelComposition.position.column_start,
+            parallelComposition.position.column_end,
+          ),
+          channels: identifiers,
+          process: parallelComposition,
+        })
+      : parallelComposition;
   }
 
   function parsePrimary(): AST.Process {

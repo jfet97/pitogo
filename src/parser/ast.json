@@ -4,7 +4,7 @@
     "row_start": 2,
     "row_end": 5,
     "column_start": 5,
-    "column_end": 29
+    "column_end": 31
   },
   "declarations": [
     {
@@ -13,7 +13,7 @@
         "row_start": 2,
         "row_end": 2,
         "column_start": 5,
-        "column_end": 25
+        "column_end": 29
       },
       "identifier": {
         "_tag": "ProcessConstant",
@@ -31,7 +31,7 @@
           "row_start": 2,
           "row_end": 2,
           "column_start": 9,
-          "column_end": 24
+          "column_end": 28
         },
         "channels": [
           {
@@ -51,7 +51,7 @@
             "row_start": 2,
             "row_end": 2,
             "column_start": 13,
-            "column_end": 24
+            "column_end": 28
           },
           "prefix": {
             "_tag": "SendMessage",
@@ -88,7 +88,7 @@
               "row_start": 2,
               "row_end": 2,
               "column_start": 20,
-              "column_end": 24
+              "column_end": 28
             },
             "prefix": {
               "_tag": "SendMessage",
@@ -124,8 +124,8 @@
               "position": {
                 "row_start": 2,
                 "row_end": 2,
-                "column_start": 20,
-                "column_end": 24
+                "column_start": 26,
+                "column_end": 28
               }
             }
           }
@@ -138,7 +138,7 @@
         "row_start": 3,
         "row_end": 3,
         "column_start": 5,
-        "column_end": 21
+        "column_end": 25
       },
       "identifier": {
         "_tag": "ProcessConstant",
@@ -156,7 +156,7 @@
           "row_start": 3,
           "row_end": 3,
           "column_start": 9,
-          "column_end": 20
+          "column_end": 24
         },
         "process": {
           "_tag": "ActionPrefix",
@@ -164,7 +164,7 @@
             "row_start": 3,
             "row_end": 3,
             "column_start": 10,
-            "column_end": 20
+            "column_end": 24
           },
           "prefix": {
             "_tag": "ReceiveMessage",
@@ -201,7 +201,7 @@
               "row_start": 3,
               "row_end": 3,
               "column_start": 16,
-              "column_end": 20
+              "column_end": 24
             },
             "prefix": {
               "_tag": "SendMessage",
@@ -237,8 +237,8 @@
               "position": {
                 "row_start": 3,
                 "row_end": 3,
-                "column_start": 16,
-                "column_end": 20
+                "column_start": 22,
+                "column_end": 24
               }
             }
           }
@@ -412,7 +412,7 @@
       "row_start": 5,
       "row_end": 5,
       "column_start": 5,
-      "column_end": 29
+      "column_end": 31
     },
     "process": {
       "_tag": "Restriction",
@@ -420,7 +420,7 @@
         "row_start": 5,
         "row_end": 5,
         "column_start": 12,
-        "column_end": 28
+        "column_end": 30
       },
       "channels": [
         {
@@ -445,52 +445,41 @@
         }
       ],
       "process": {
-        "_tag": "NonDeterministicChoice",
+        "_tag": "ParallelComposition",
         "position": {
           "row_start": 5,
           "row_end": 5,
           "column_start": 20,
-          "column_end": 28
+          "column_end": 30
         },
         "processes": [
           {
-            "_tag": "ParallelComposition",
+            "_tag": "ProcessConstant",
             "position": {
               "row_start": 5,
               "row_end": 5,
-              "column_start": 20,
-              "column_end": 24
+              "column_start": 21,
+              "column_end": 21
             },
-            "processes": [
-              {
-                "_tag": "ProcessConstant",
-                "position": {
-                  "row_start": 5,
-                  "row_end": 5,
-                  "column_start": 20,
-                  "column_end": 20
-                },
-                "identifier": "A"
-              },
-              {
-                "_tag": "ProcessConstant",
-                "position": {
-                  "row_start": 5,
-                  "row_end": 5,
-                  "column_start": 24,
-                  "column_end": 24
-                },
-                "identifier": "S"
-              }
-            ]
+            "identifier": "A"
           },
           {
             "_tag": "ProcessConstant",
             "position": {
               "row_start": 5,
               "row_end": 5,
-              "column_start": 28,
-              "column_end": 28
+              "column_start": 25,
+              "column_end": 25
+            },
+            "identifier": "S"
+          },
+          {
+            "_tag": "ProcessConstant",
+            "position": {
+              "row_start": 5,
+              "row_end": 5,
+              "column_start": 29,
+              "column_end": 29
             },
             "identifier": "B"
           }
