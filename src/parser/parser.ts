@@ -610,3 +610,42 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
   return parseProgram();
 }
+
+// :(
+// Program -> Declaration* Main
+// Declaration -> ProcessIdentifier TOKENS.Equal Process TOKENS.Semicolon
+// Main -> TOKENS.Main TOKENS.Equal Process TOKENS.Semicolon
+// Process -> (Prefix TOKEN.Dot)* (Prefix | Matching)
+// Prefix ->  LogMessage | SendMessage | ReceiveMessage
+// SendMessage -> Identifier TOKENS.OpenAngleBracker Message TOKENS.CloseAngleBracket
+// ReceiveMessage -> Identifier TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis
+// LogMessage -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
+// Message -> StringLiteral | NumberLiteral | Identifier
+// Matching -> (TOKENS.OpenBracket Identifier TOKENS.Equal Identifier TOKENS.CloseBracket)* NonDeterministicChoice
+// NonDeterministicChoice -> ParallelComposition (TOKENS.Plus ParallelComposition)*
+// ParallelComposition -> RRp (TOKENS.VerticalBar RRp)*
+// RRp -> Replication | Restriction | primary
+// Replication -> TOKENS.Bang Process
+// Restriction -> (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)+ Process
+// primary -> InactiveProcess | ProcessConstant | TOKENS.OpenParenthesis Process TOKENS.CloseParenthesis
+// InactiveProcess -> TOKENS.Nil
+// InactiveProcess -> TOKENS.Nil
+
+// :)
+// Program -> Declaration* Main
+// Declaration -> ProcessIdentifier TOKENS.Equal Process TOKENS.Semicolon
+// Main -> TOKENS.Main TOKENS.Equal Process TOKENS.Semicolon
+// Process -> Replication
+// Replication -> (TOKENS.Bang)* Restriction
+// Restriction -> (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)* ParallelComposition
+// ParallelComposition -> NonDeterministicChoice (TOKENS.VerticalBar NonDeterministicChoice)*
+// NonDeterministicChoice -> Matching (TOKENS.Plus Matching)*
+// Matching -> (TOKENS.OpenBracket Identifier TOKENS.Equal Identifier TOKENS.CloseBracket)* ActionPrefix
+// ActionPrefix -> (Prefix TOKEN.Dot)* (Prefix | primary)
+// Prefix ->  LogMessage | SendMessage | ReceiveMessage
+// SendMessage -> Identifier TOKENS.OpenAngleBracker Message TOKENS.CloseAngleBracket
+// ReceiveMessage -> Identifier TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis
+// LogMessage -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
+// Message -> StringLiteral | NumberLiteral | Identifier
+// primary -> InactiveProcess | ProcessConstant | TOKENS.OpenParenthesis Process TOKENS.CloseParenthesis
+// InactiveProcess -> TOKENS.Nil
