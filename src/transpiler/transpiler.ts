@@ -46,7 +46,6 @@ func NewMessageChannel() Message {
 ${ast.declarations.map(d => transpileToGo(d)).join("\n")}
 ${transpileToGo(ast.main)}`
         }
-
         case P.NODES.Log: {
             return `println(${ast._tag})`
         }
