@@ -9,7 +9,7 @@ import { parse } from './index.js';
 //   scanner(`
 //     A = (ab)as<ab>.ab<m>.nil;
 //     S = !as(x).bs<x>.nil;
-//     B = bs(y).y(w).log<y>.log<w>.nil;
+//     B = bs(y).y(w).log<y>.log<w>;
 //     main = (as)(bs)(A | S | B);
 //   `),
 // );
@@ -23,21 +23,22 @@ import { parse } from './index.js';
 //   `),
 // );
 
-const ast = parse(
-  scanner(`
-    A = (ab)as<ab>.ab<m>.nil | P;
-    main = A;
-  `),
-);
-
 // const ast = parse(
 //   scanner(`
-//     main = (as)(bs)A | S + B;
+//     A = (ab)as<ab>.ab<m>.nil | P;
+//     main = A;
 //   `),
 // );
 
-removeSingleParallelComposition(ast);
-removeSingleNonDeterministicChoice(ast);
+const ast = parse(
+  scanner(`
+    main = (as)(bs)(A | S + B);
+  `),
+);
+
+// pruning done into AST
+// removeSingleParallelComposition(ast);
+// removeSingleNonDeterministicChoice(ast);
 
 console.log(prettyPrint(ast));
 
