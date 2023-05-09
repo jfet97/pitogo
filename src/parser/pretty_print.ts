@@ -43,7 +43,6 @@ export function prettyPrint(curr: AST.Node, indent = 0): string {
 
       break;
     }
-
     case AST.NODES.SendMessage: {
       currStr +=
         `${currSpace}Node: ${curr._tag}\n` +
@@ -125,7 +124,17 @@ export function prettyPrint(curr: AST.Node, indent = 0): string {
         prettyPrint(curr.right, indent + 2);
       break;
     }
+    case AST.NODES.Restriction: {
+      currStr +=
+        `${currSpace}Node: ${curr._tag}\n` +
+        `${currSpace}Channels:\n` +
+        curr.channels
+          .map((channel) => prettyPrint(channel, indent + 2))
+          .join('\n') +
+        `${currSpace}Process:\n` +
+        prettyPrint(curr.process, indent + 2);
+      break;
+    }
   }
-
   return currStr;
 }
