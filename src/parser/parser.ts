@@ -121,7 +121,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     const prefixes: AST.ActionPrefix[] = [];
 
     // (Prefix TOKEN.Dot)*
-    while (check(S.TOKENS.Identifier)) {
+    while (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) {
       const prefix = parsePrefix();
 
       if (!match(S.TOKENS.Dot)) {
@@ -160,10 +160,10 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parsePrefix(): AST.Prefix {
-    // Prefix ->  Log | SendMessage | ReceiveMessage
+    // Prefix ->  LogMessage | SendMessage | ReceiveMessage
 
     if (check(S.TOKENS.Log)) {
-      return parseLog();
+      return parseLogMessage();
     } else if (check(S.TOKENS.OpenAngleBracket, 1)) {
       return parseSendMessage();
     } else if (check(S.TOKENS.OpenParenthesis, 1)) {
@@ -219,6 +219,34 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
         message.position.column_end,
       ),
       channel,
+      message,
+    });
+  }
+
+  function parseLogMessage(): AST.Log {
+    // LogMessage -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
+
+    if (!check(S.TOKENS.Log)) {
+      raise('Expected a log');
+    }
+
+    const log = advance() as S.Log;
+
+    if (!match(S.TOKENS.OpenAngleBracket)) {
+      raise('Expected an open angle bracket');
+    }
+
+    const message = parseMessage();
+
+    const closeAngleBracket = parseCloseAngleBracket();
+
+    return AST.buildNode(AST.NODES.Log, {
+      position: new Position(
+        log.position.row_start,
+        closeAngleBracket.position.row_end,
+        log.position.column_start,
+        closeAngleBracket.position.column_end,
+      ),
       message,
     });
   }
@@ -334,8 +362,6 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       processes.push(parseRRp());
     }
 
-    console.log({ processes });
-
     return AST.buildNode(AST.NODES.ParallelComposition, {
       position: new Position(
         processes[0].position.row_start,
@@ -357,7 +383,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
       check(S.TOKENS.Identifier, 1) &&
       check(S.TOKENS.CloseParenthesis, 2)
     ) {
-      // disambiguate between 'primary = (Process' vs Restriction
+      // disambiguate between 'primary = (Process' vs Restriction (ab)
       return parseRestriction();
     } else {
       return parsePrimary();
@@ -439,34 +465,6 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
       return process;
     }
-  }
-
-  function parseLog(): AST.Log {
-    // Log -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
-
-    if (!check(S.TOKENS.Log)) {
-      raise('Expected a log');
-    }
-
-    const log = advance() as S.Log;
-
-    if (!match(S.TOKENS.OpenAngleBracket)) {
-      raise('Expected an open angle bracket');
-    }
-
-    const message = parseMessage();
-
-    const closeAngleBracket = parseCloseAngleBracket();
-
-    return AST.buildNode(AST.NODES.Log, {
-      position: new Position(
-        log.position.row_start,
-        closeAngleBracket.position.row_end,
-        log.position.column_start,
-        closeAngleBracket.position.column_end,
-      ),
-      message,
-    });
   }
 
   function parseInactiveProcess(): AST.InactiveProcess {
