@@ -455,14 +455,16 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     let firstOpenParenthesis: S.OpenParenthesis | null = null;
 
     while (check(S.TOKENS.OpenParenthesis)) {
-      const op = parseOpenParenthesis();
-      !firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
-
-      if (!check(S.TOKENS.Identifier) || !check(S.TOKENS.CloseParenthesis, 1)) {
+      if (
+        !check(S.TOKENS.Identifier, 1) ||
+        !check(S.TOKENS.CloseParenthesis, 2)
+      ) {
         // disambiguate between '(as)(bs)(A | S | B)' vs '(as)(bs)(cs)' vs '(as)(bs)(A)'
-        back();
         break;
       }
+
+      const op = parseOpenParenthesis();
+      !firstOpenParenthesis && (firstOpenParenthesis = op); // in loving memory of Yuri ❤️
 
       identifiers.push(parseIdentifier());
 
