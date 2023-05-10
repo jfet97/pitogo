@@ -127,7 +127,14 @@ ${transpileToGo(ast.process)}`
     }
 
     case P.NODES.SendMessage: {
-      return `${ast.channel.identifier}.Channel() <- ${transpileToGo(ast.message)}`
+      switch (ast.channel._tag){
+        case P.NODES.Identifier: {
+          return `${ast.channel.identifier}.Channel() <- ${transpileToGo(ast.message)}`
+        }
+        case P.NODES.ProcessConstant: {
+          return `${ast.channel.identifier}(${transpileToGo(ast.message)})`
+        }
+      }
     }
 
     case P.NODES.Restriction: {

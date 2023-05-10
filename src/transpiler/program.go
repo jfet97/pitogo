@@ -86,7 +86,7 @@ go func(){
 go func(){
           
 a := NewChannelMessage()
-C.Channel() <- a
+C(a)
 
         }()
 }
