@@ -22,6 +22,9 @@ export function prettyPrint(curr: AST.Node, indent = 0): string {
         `${currSpace}Node: ${curr._tag}\n` +
         `${currSpace}Identifier:\n` +
         prettyPrint(curr.identifier, indent + 2) +
+        curr.parameters
+          .map((identifier) => prettyPrint(identifier, indent + 2))
+          .join('\n') +
         `${currSpace}Process:\n` +
         prettyPrint(curr.process, indent + 2);
 

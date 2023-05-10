@@ -27,3 +27,5 @@ build/
 
 # Misc
 .DS_Store
+
+src/parser/ast.json
