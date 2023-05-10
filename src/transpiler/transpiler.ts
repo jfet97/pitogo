@@ -72,11 +72,7 @@ func (m Message) Println() {
 // usage: fmt.Println(NewStringMessage("hello"))
 // result: Message<"hello">
 
-func Log(log <- chan Message) {
-  for {
-    fmt.Println(<- log)
-  }
-}
+
 
 
 
@@ -86,82 +82,109 @@ ${transpileToGo(ast.main)}`;
 
     case P.NODES.Main: {
       return `func main() {
-log := make(chan Message)
-go Log(log)
+
 ${transpileToGo(ast.process)}
 }`;
     }
 
     case P.NODES.ActionPrefix: {
       return `${transpileToGo(ast.prefix)}
-${transpileToGo(ast.process)}`
+${transpileToGo(ast.process)}`;
     }
-
 
     case P.NODES.Log: {
-      return `log <- ${transpileToGo(ast.message)}`;
+      return `fmt.Println(${transpileToGo(ast.message)})`;
     }
-
     case P.NODES.InactiveProcess: {
-      return ''
+      return '';
     }
 
     case P.NODES.StringLiteral: {
-      return `NewStringMessage("${ast.value}")`
+      return `NewStringMessage("${ast.value}")`;
     }
 
     case P.NODES.NumberLiteral: {
-      return `NewNumberMessage(${ast.value})`
+      return `NewNumberMessage(${ast.value})`;
     }
 
     case P.NODES.Identifier: {
-      return ast.identifier
+      return ast.identifier;
     }
 
     case P.NODES.Declaration: {
-      return `func ${ast.identifier.identifier}(`+
+      return (
+        `func ${ast.identifier.identifier}(` +
         ast.parameters
-          .map((identifier) => identifier.identifier + " Message")
-          .join(", ") + ") {\n" +
-        transpileToGo(ast.process) + "\n}"
-    }
-
-    case P.NODES.SendMessage: {
-      switch (ast.channel._tag){
-        case P.NODES.Identifier: {
-          return `${ast.channel.identifier}.Channel() <- ${transpileToGo(ast.message)}`
-        }
-        case P.NODES.ProcessConstant: {
-          return `${ast.channel.identifier}(${transpileToGo(ast.message)})`
-        }
-      }
+          .map((identifier) => identifier.identifier + ' Message')
+          .join(', ') +
+        ` ) {\n` +
+        transpileToGo(ast.process) +
+        '\n}'
+      );
     }
 
     case P.NODES.Restriction: {
-      return ast.channels
-        .map((channel) => `
-${channel.identifier} := NewChannelMessage()`)
-        .join("\n") + "\n" +
+      return (
+        ast.channels
+          .map(
+            (channel) => `
+${channel.identifier} := NewChannelMessage()`,
+          )
+          .join('\n') +
+        '\n' +
         transpileToGo(ast.process)
+      );
+    }
+
+    case P.NODES.SendMessage: {
+      switch (ast.channel._tag) {
+        case P.NODES.Identifier: {
+          return `${ast.channel.identifier}.Channel() <- ${transpileToGo(
+            ast.message,
+          )}`;
+        }
+        case P.NODES.ProcessConstant: {
+          return `${ast.channel.identifier}(${transpileToGo(ast.message)})`;
+        }
+      }
+      break;
+    }
+
+    case P.NODES.ReceiveMessage: {
+      return `${transpileToGo(ast.message)} := <- ${ast.channel.identifier}.Channel()\n`;
+    }
+
+    case P.NODES.ProcessConstant: {
+      return `${ast.identifier}()`;
     }
 
     case P.NODES.ParallelComposition: {
-      return ast.processes
-        .map((proc) => `go func(){
-          ${transpileToGo(proc)}
-        }()`)
-        .join("\n")
+      return `
+      // nesting to avoid name collisions, I always use the same name for the channel
+      func(){
+        dOne := make(chan struct{}, ${ast.processes.length})
+        ${ast.processes
+          .map(
+            (proc) => `go func(dOne chan <- struct{}){
+            ${transpileToGo(proc)}
+          dOne <- struct{}{}  // signal completion
+        }(dOne)`,
+          )
+          .join('\n')}
+        for i := 0; i < ${ast.processes.length}; i++ {
+          <- dOne
+        }\n  }()\n`;
     }
 
-//     case P.NODES.NonDeterministicChoice: {
-//       const phonyProcesses = ast.processes.filter((process) => process._tag !== P.NODES.ActionPrefix)
+    //     case P.NODES.NonDeterministicChoice: {
+    //       const phonyProcesses = ast.processes.filter((process) => process._tag !== P.NODES.ActionPrefix)
 
-//       phonyProcesses.map((_, i) => `PhOnY${i} := make(int, 1)
-// PhOnY${i} <- 0`).join("\n")
-//       return `select {
-//         ${ast.processes.map((process) => )}
-//       }`
-//     }
+    //       phonyProcesses.map((_, i) => `PhOnY${i} := make(int, 1)
+    // PhOnY${i} <- 0`).join("\n")
+    //       return `select {
+    //         ${ast.processes.map((process) => )}
+    //       }`
+    //     }
 
     default:
       return `// ${ast._tag} not Implemented`;
