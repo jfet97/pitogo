@@ -72,14 +72,24 @@ func (m Message) Println() {
 // usage: fmt.Println(NewStringMessage("hello"))
 // result: Message<"hello">
 
+func Log(log <- chan Message) {
+  for {
+    fmt.Println(<- log)
+  }
+}
+
+
+
 ${ast.declarations.map((d) => transpileToGo(d)).join('\n')}
 ${transpileToGo(ast.main)}`;
     }
 
     case P.NODES.Main: {
       return `func main() {
+log := make(chan Message)
+go Log(log)
 ${transpileToGo(ast.process)}
-}`
+}`;
     }
 
     case P.NODES.ActionPrefix: {
@@ -89,7 +99,7 @@ ${transpileToGo(ast.process)}`
 
 
     case P.NODES.Log: {
-      return `fmt.Println(${transpileToGo(ast.message)})`;
+      return `log <- ${transpileToGo(ast.message)}`;
     }
 
     case P.NODES.InactiveProcess: {
@@ -122,7 +132,8 @@ ${transpileToGo(ast.process)}`
 
     case P.NODES.Restriction: {
       return ast.channels
-        .map((channel) => `${channel.identifier} := NewChannelMessage()`)
+        .map((channel) => `
+${channel.identifier} := NewChannelMessage()`)
         .join("\n") + "\n" +
         transpileToGo(ast.process)
     }
@@ -146,6 +157,6 @@ ${transpileToGo(ast.process)}`
 //     }
 
     default:
-      return `${ast._tag} Is Implemented`;
+      return `// ${ast._tag} not Implemented`;
   }
 }
