@@ -67,11 +67,35 @@ ${ast.declarations.map((d) => transpileToGo(d)).join('\n')}
 ${transpileToGo(ast.main)}`;
     }
 
+    case P.NODES.Main: {
+      return `func main() {
+${transpileToGo(ast.process)}
+}`
+    }
+
+    case P.NODES.ActionPrefix: {
+      return `${transpileToGo(ast.prefix)}
+${transpileToGo(ast.process)}`
+    }
+
+
     case P.NODES.Log: {
-      return `println(${ast._tag})`;
+      return `fmt.Println(${transpileToGo(ast.message)})`;
+    }
+
+    case P.NODES.InactiveProcess: {
+      return ''
+    }
+
+    case P.NODES.StringLiteral: {
+      return `"${ast.value}"`
+    }
+
+    case P.NODES.Declaration: {
+      return "asdasd"
     }
 
     default:
-      return 'Not Implemented';
+      return `${ast._tag} Not Implemented`;
   }
 }

@@ -1,8 +1,4 @@
 import { scanner } from '../scanner/index.js';
-import {
-  removeSingleNonDeterministicChoice,
-  removeSingleParallelComposition,
-} from './clean.js';
 import { parse } from './index.js';
 
 const ast = parse(
