@@ -10,7 +10,7 @@ const ast = parse(
     A = (ab)as<ab>.ab<m>.nil;
     S = !as(x).bs<x>.nil;
     B = bs(y).y(w).log<y>.log<w>;
-    main = (as)(bs)(A | S | B);
+    main = (as)(bs)A | S | B;
   `),
 );
 

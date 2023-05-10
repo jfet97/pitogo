@@ -21,7 +21,7 @@ import * as AST from './ast.js';
 // primary -> InactiveProcess | ProcessConstant | TOKENS.OpenParenthesis Process TOKENS.CloseParenthesis
 // InactiveProcess -> TOKENS.Nil
 
-// LL(3) parser ???
+// LL(2) parser ???
 export function parse(tokens: readonly S.Token[]): AST.Program {
   let index = 0;
 
@@ -455,10 +455,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     let firstOpenParenthesis: S.OpenParenthesis | null = null;
 
     while (check(S.TOKENS.OpenParenthesis)) {
-      if (
-        !check(S.TOKENS.Identifier, 1) ||
-        !check(S.TOKENS.CloseParenthesis, 2)
-      ) {
+      if (!check(S.TOKENS.Identifier, 1)) {
         // disambiguate between '(as)(bs)(A | S | B)' vs '(as)(bs)(cs)' vs '(as)(bs)(A)'
         break;
       }
