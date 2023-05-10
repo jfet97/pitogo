@@ -5,5 +5,11 @@ import { transpileToGo } from "./transpiler.js"
 console.log(transpileToGo(P.parse(S.scanner(`
 A = a<a>;
 B = b<b>;
-main = (a)a<a>;
+main = log<"yo">;
 `))))
+
+console.log(P.parse(S.scanner(`
+A = a<a>;
+B = b<b>;
+main = log<"yo">;
+`)))
