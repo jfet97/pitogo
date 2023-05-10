@@ -1,4 +1,4 @@
-import * as P from "../parser/index.js"
+import * as P from '../parser/index.js';
 
 //   | Program
 //   | Declaration
@@ -19,9 +19,9 @@ import * as P from "../parser/index.js"
 //   | Replication;
 
 export function transpileToGo(ast: P.Node): string {
-    switch (ast._tag) {
-        case P.NODES.Program: {
-            return `
+  switch (ast._tag) {
+    case P.NODES.Program: {
+      return `
 package main
 
 import "fmt"
@@ -43,16 +43,35 @@ func NewMessageChannel() Message {
 	return Message{value: ch}
 }
 
-${ast.declarations.map(d => transpileToGo(d)).join("\n")}
-${transpileToGo(ast.main)}`
-        }
+func (m Message) String() string {
+	switch v := m.value.(type) {
+	case int:
+		return fmt.Sprintf("Message<%d>", v)
+	case string:
+		return fmt.Sprintf("Message<\\"%s\\">", v)
+	case chan Message:
+		return "Message<channel>"
+	default:
+		return "Message<unknown>"
+	}
+}
 
-        case P.NODES.Log: {
-            return `println(${ast._tag})`
-        }
-    
-        default:
-            return 'Not Implemented'
+func (m Message) Println() {
+	fmt.Println(m.String())
+}
+
+// usage: fmt.Println(NewMessageString("hello"))
+// result: Message<"hello">
+
+${ast.declarations.map((d) => transpileToGo(d)).join('\n')}
+${transpileToGo(ast.main)}`;
     }
 
+    case P.NODES.Log: {
+      return `println(${ast._tag})`;
+    }
+
+    default:
+      return 'Not Implemented';
+  }
 }
