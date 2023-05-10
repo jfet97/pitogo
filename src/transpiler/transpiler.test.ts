@@ -4,10 +4,11 @@ import { transpileToGo } from './transpiler.js';
 
 const ast = P.parse(
   S.scanner(`
-A = (a)a<a>;
-B = (b)b<b>;
-C(x) = x<"yo">;
-main = log<"yo"> | A + B | ((a)C<a>);
+    A = log<"a">;
+    B = log<"b">;
+    C(c) = c<"c">;
+    D = A | B;
+    main = log<"main"> | ((c)(C<c> | c(m).log<m>)) | D | (A | B | ( A | B));
 `),
 );
 
