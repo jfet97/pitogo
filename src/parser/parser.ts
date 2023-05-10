@@ -4,7 +4,7 @@ import * as AST from './ast.js';
 
 // :)
 // Program -> Declaration* Main
-// Declaration -> ProcessIdentifier TOKENS.Equal Process TOKENS.Semicolon
+// Declaration -> ProcessConstant (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)? TOKENS.Equal Process TOKENS.Semicolon
 // Main -> TOKENS.Main TOKENS.Equal Process TOKENS.Semicolon
 // Process -> Replication
 // Replication -> (TOKENS.Bang)* Restriction
@@ -14,7 +14,7 @@ import * as AST from './ast.js';
 // Matching -> (TOKENS.OpenBracket Identifier TOKENS.Equal Identifier TOKENS.CloseBracket)* ActionPrefix
 // ActionPrefix -> (Prefix TOKEN.Dot)* (Prefix | primary)
 // Prefix ->  LogMessage | SendMessage | ReceiveMessage
-// SendMessage -> Identifier TOKENS.OpenAngleBracker Message TOKENS.CloseAngleBracket
+// SendMessage -> (Identifier | ProcessConstant) TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
 // ReceiveMessage -> Identifier TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis
 // LogMessage -> TOKENS.Log TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
 // Message -> StringLiteral | NumberLiteral | Identifier
@@ -67,10 +67,17 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parseDeclaration(): AST.Declaration {
-    // Declaration -> ProcessIdentifier TOKENS.Equal Process TOKENS.Semicolon
+    // Declaration -> ProcessConstant (TOKENS.OpenParenthesis Identifier TOKENS.CloseParenthesis)? TOKENS.Equal Process TOKENS.Semicolon
 
     // identifier
     const processConstant = parseProcessConstant();
+
+    const parameters: AST.Identifier[] = []
+    if (check(S.TOKENS.OpenParenthesis)){
+      parseOpenParenthesis()
+      parameters.push(parseIdentifier())
+      parseCloseParenthesis()
+    }
 
     // equal
     if (!match(S.TOKENS.Equal)) {
@@ -95,6 +102,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
         position: processConstant.position,
         identifier: processConstant.identifier,
       }),
+      parameters,
       process,
     });
   }
@@ -155,8 +163,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   }
 
   function parseSendMessage(): AST.SendMessage {
-    // SendMessage -> Identifier TOKENS.OpenAngleBracker Message TOKENS.CloseAngleBracket
-    const channel = parseIdentifier();
+    // SendMessage -> (Identifier | ProcessConstant) TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
+
+    const channel = check(AST.NODES.Identifier) ? parseIdentifier() : parseProcessConstant();
 
     if (!match(S.TOKENS.OpenAngleBracket)) {
       raise('Expected an open angle bracket');
@@ -362,7 +371,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     let shouldParsePrimary = true;
 
     while (
-      (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) &&
+      (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) || (check(S.TOKENS.ProcessConstant) && check(S.TOKENS.OpenAngleBracket, 1))&&
       shouldParsePrimary
     ) {
       const prefix = parsePrefix();

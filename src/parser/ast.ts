@@ -35,6 +35,7 @@ export class Declaration {
   constructor(
     public position: Position,
     public identifier: ProcessConstant,
+    public parameters: readonly Identifier[],
     public process: Process,
   ) {}
 }
@@ -53,7 +54,7 @@ export class SendMessage {
   _tag = NODES.SendMessage;
   constructor(
     public position: Position,
-    public channel: Identifier,
+    public channel: Identifier | ProcessConstant,
     public message: Message,
   ) {}
 }
@@ -181,7 +182,7 @@ export function buildNode<NODE extends Node['_tag']>(
     }
     case NODES.Declaration: {
       // @ts-expect-error it cannot narrow down the type
-      return new Declaration(position, args.identifier, args.process);
+      return new Declaration(position, args.identifier, args.parameters, args.process);
     }
     case NODES.Main: {
       // @ts-expect-error it cannot narrow down the type
