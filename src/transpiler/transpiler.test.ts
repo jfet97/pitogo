@@ -8,7 +8,7 @@ const ast = P.parse(
     B = log<"b">;
     C(c) = c<"c">;
     D = A | B;
-    main = log<"main"> | ((c)(C<c> | c(m).log<m>)) | D | (A | B | ( A | B));
+    main = log<"main"> | ((c)(C<c> | c(m).log<m>)) | D | (A | B | (A | B)) | ((c)[c = c]log<"c=c">) | ((c)(d)[c = d]log<"c=c">);
 `),
 );
 

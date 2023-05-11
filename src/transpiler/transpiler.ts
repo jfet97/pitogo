@@ -176,6 +176,16 @@ ${channel.identifier} := NewChannelMessage()`,
         }\n  }()\n`;
     }
 
+    case P.NODES.Matching : {
+
+      return `
+      if ${transpileToGo(ast.left)} == ${transpileToGo(ast.right)} {
+        ${transpileToGo(ast.process)}
+      }
+      `;
+
+    }
+
     //     case P.NODES.NonDeterministicChoice: {
     //       const phonyProcesses = ast.processes.filter((process) => process._tag !== P.NODES.ActionPrefix)
 
