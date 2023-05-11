@@ -89,7 +89,7 @@ func main() {
 
       // nesting to avoid name collisions, I always use the same name for the channel
       func(){
-        dOne := make(chan struct{}, 4)
+        dOne := make(chan struct{}, 6)
         go func(dOne chan <- struct{}){
             fmt.Println(NewStringMessage("main"))
 
@@ -165,7 +165,31 @@ go func(dOne chan <- struct{}){
 
           dOne <- struct{}{}  // signal completion
         }(dOne)
-        for i := 0; i < 4; i++ {
+go func(dOne chan <- struct{}){
+            
+c := NewChannelMessage()
+
+      if c == c {
+        fmt.Println(NewStringMessage("c=c"))
+
+      }
+      
+          dOne <- struct{}{}  // signal completion
+        }(dOne)
+go func(dOne chan <- struct{}){
+            
+c := NewChannelMessage()
+
+d := NewChannelMessage()
+
+      if c == d {
+        fmt.Println(NewStringMessage("c=c"))
+
+      }
+      
+          dOne <- struct{}{}  // signal completion
+        }(dOne)
+        for i := 0; i < 6; i++ {
           <- dOne
         }
   }()
