@@ -153,7 +153,7 @@ ${channel.identifier} := NewChannelMessage()`,
     case P.NODES.ReceiveMessage: {
       return `${transpileToGo(ast.message)} := <- ${
         ast.channel.identifier
-      }.Channel()\n`;
+      }.Channel()`;
     }
 
     case P.NODES.ProcessConstant: {
@@ -203,17 +203,28 @@ ${channel.identifier} := NewChannelMessage()`,
       `;
     }
 
-    //     case P.NODES.NonDeterministicChoice: {
-    //       const phonyProcesses = ast.processes.filter((process) => process._tag !== P.NODES.ActionPrefix)
+    case P.NODES.NonDeterministicChoice: {
+      return `{
+  PhOnYcHaNnEl := make(chan struct{}, 1)
+  PhOnYcHaNnEl <- struct{}{}
+  select {
+    ${ast.processes.map((process) => {
+          switch (process._tag) {
+            case P.NODES.ActionPrefix: {
+              return `case ${transpileToGo(process.prefix)} :
+      ${transpileToGo(process.process)}`
+            }
+            default: {
+              return `case <- PhOnYcHaNnEl :
+      ${transpileToGo(process)}`
+            }
+          }
+        }).join('\n    ')}
+  }
+}`
+    }
 
-    //       phonyProcesses.map((_, i) => `PhOnY${i} := make(int, 1)
-    // PhOnY${i} <- 0`).join("\n")
-    //       return `select {
-    //         ${ast.processes.map((process) => )}
-    //       }`
-    //     }
-
-    default:
-      return `// ${ast._tag} not Implemented`;
+    // default:
+    //   return `// ${ast._tag} not Implemented`;
   }
 }
