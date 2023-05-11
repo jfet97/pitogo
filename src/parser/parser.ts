@@ -72,11 +72,11 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     // identifier
     const processConstant = parseProcessConstant();
 
-    const parameters: AST.Identifier[] = []
-    if (check(S.TOKENS.OpenParenthesis)){
-      parseOpenParenthesis()
-      parameters.push(parseIdentifier())
-      parseCloseParenthesis()
+    const parameters: AST.Identifier[] = [];
+    if (check(S.TOKENS.OpenParenthesis)) {
+      parseOpenParenthesis();
+      parameters.push(parseIdentifier());
+      parseCloseParenthesis();
     }
 
     // equal
@@ -165,7 +165,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   function parseSendMessage(): AST.SendMessage {
     // SendMessage -> (Identifier | ProcessConstant) TOKENS.OpenAngleBracket Message TOKENS.CloseAngleBracket
 
-    const channel = check(AST.NODES.Identifier) ? parseIdentifier() : parseProcessConstant();
+    const channel = check(AST.NODES.Identifier)
+      ? parseIdentifier()
+      : parseProcessConstant();
 
     if (!match(S.TOKENS.OpenAngleBracket)) {
       raise('Expected an open angle bracket');
@@ -371,8 +373,11 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     let shouldParsePrimary = true;
 
     while (
-      (check(S.TOKENS.Identifier) || check(S.TOKENS.Log)) || (check(S.TOKENS.ProcessConstant) && check(S.TOKENS.OpenAngleBracket, 1))&&
-      shouldParsePrimary
+      check(S.TOKENS.Identifier) ||
+      check(S.TOKENS.Log) ||
+      (check(S.TOKENS.ProcessConstant) &&
+        check(S.TOKENS.OpenAngleBracket, 1) &&
+        shouldParsePrimary)
     ) {
       const prefix = parsePrefix();
 
@@ -443,7 +448,11 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
     const restriction = parseRestriction();
 
-    return firstBang
+    return firstBang &&
+      // !!p is bisimilar to !p
+      restriction._tag !== AST.NODES.Replication &&
+      // !nil is bisimilar to nil
+      restriction._tag !== AST.NODES.InactiveProcess
       ? AST.buildNode(AST.NODES.Replication, {
           position: new Position(
             firstBang?.position.row_start ?? restriction.position.row_start,
@@ -633,7 +642,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   // error
   function raise(message: string): never {
     throw new Error(
-      `Error: ${message} at ${JSON.stringify(tokens[index].position)}`,
+      `Error: ${message} at ${JSON.stringify(
+        tokens[index]?.position || tokens[index - 1]?.position,
+      )}`,
     );
   }
 

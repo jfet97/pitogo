@@ -3,11 +3,11 @@ import { parse } from '../src/parser/index.js';
 import { writeFileSync } from 'fs';
 import { prettyPrint } from '../src/parser/pretty_print.js';
 
-describe('parser', () => {
-  it('true', () => {
-    expect(true).toBe(true);
-  });
-});
+// describe('parser', () => {
+//   it('true', () => {
+//     expect(true).toBe(true);
+//   });
+// });
 
 const ast = parse(
   scanner(`

@@ -28,6 +28,6 @@ build/
 # Misc
 .DS_Store
 
-./__tests__/ast.json
+__tests__/ast.json
 
-./__tests__/program.go
+__tests__/program.go

@@ -1,4 +1,5 @@
 import * as P from '../parser/index.js';
+import * as C from '../common/index.js';
 
 //   | Program
 //   | Declaration
@@ -18,13 +19,18 @@ import * as P from '../parser/index.js';
 //   | Restriction
 //   | Replication;
 
+const processConstantsAST: Record<string, P.Declaration> = {};
+
 export function transpileToGo(ast: P.Node): string {
   switch (ast._tag) {
     case P.NODES.Program: {
       return `
 package main
 
-import "fmt"
+import (
+  "fmt"
+  "math/rand"
+)
 
 type Message struct {
 	value interface{}
@@ -72,19 +78,30 @@ func (m Message) Println() {
 // usage: fmt.Println(NewStringMessage("hello"))
 // result: Message<"hello">
 
+func Log(log <- chan Message) {
+  for {
+    fmt.Println(<- log)
+  }
+}
 
 
+func main() {
+  log := make(chan Message)
+  go Log(log)
 
+  ${ast.declarations
+    .map((d) => `${d.identifier.identifier} := ${transpileToGo(d)}`)
+    .join('\n')}
 
-${ast.declarations.map((d) => transpileToGo(d)).join('\n')}
-${transpileToGo(ast.main)}`;
+  ${transpileToGo(ast.main)}
+
+  // avoid declared and not used errors
+${ast.declarations.map((d) => `_ = ${d.identifier.identifier}`).join('\n')}
+}`;
     }
 
     case P.NODES.Main: {
-      return `func main() {
-
-${transpileToGo(ast.process)}
-}`;
+      return `${transpileToGo(ast.process)}`;
     }
 
     case P.NODES.ActionPrefix: {
@@ -93,7 +110,7 @@ ${transpileToGo(ast.process)}`;
     }
 
     case P.NODES.Log: {
-      return `fmt.Println(${transpileToGo(ast.message)})`;
+      return `log <- ${transpileToGo(ast.message)}`;
     }
     case P.NODES.InactiveProcess: {
       return '';
@@ -112,8 +129,9 @@ ${transpileToGo(ast.process)}`;
     }
 
     case P.NODES.Declaration: {
+      processConstantsAST[ast.identifier.identifier] = ast;
       return (
-        `func ${ast.identifier.identifier}(` +
+        `func (` +
         ast.parameters
           .map((identifier) => identifier.identifier + ' Message')
           .join(', ') +
@@ -187,20 +205,25 @@ ${channel.identifier} := NewChannelMessage()`,
     }
 
     case P.NODES.Replication: {
+      const p = transpileToGo(handleReplicatedProcess(ast.process));
+
       return `
       // nesting to avoid name collisions, I always use the same name for the channel
       {
-      goOn := make(chan struct{}, 100)
-      for {
-        go func(goOn <- chan struct{}){
-            ${transpileToGo(ast.process)}
-          <- goOn  // signal completion the other way around
-        }(goOn)
-
-        goOn <- struct{}{}
-      }
-    }\n
-      `;
+        goOn := NewChannelMessage()
+        a := 300
+        b := rand.Intn(100)
+        for ; b < a; {
+          go func(){
+          ${p}
+          }()
+          go func(){
+            ${p}
+          }()
+          <- goOn.Channel()
+          }
+        }
+    `;
     }
 
     case P.NODES.NonDeterministicChoice: {
@@ -228,5 +251,81 @@ ${channel.identifier} := NewChannelMessage()`,
 
     // default:
     //   return `// ${ast._tag} not Implemented`;
+  }
+}
+
+function handleReplicatedProcess(process: P.Process): P.Process {
+  const signalFirstMoveDone = P.buildNode(P.NODES.SendMessage, {
+    channel: P.buildNode(P.NODES.Identifier, {
+      identifier: 'goOn',
+      position: C.Position.dummy(),
+    }),
+    position: C.Position.dummy(),
+    message: P.buildNode(P.NODES.StringLiteral, {
+      position: C.Position.dummy(),
+      value: 'first move done',
+    }),
+  });
+
+  const actionPrefixToSignalFirstMove = P.buildNode(P.NODES.ActionPrefix, {
+    position: C.Position.dummy(),
+    prefix: signalFirstMoveDone,
+    process: null as unknown as P.Process, // <- temp, will be filled soon
+  });
+
+  switch (process._tag) {
+    case P.NODES.InactiveProcess: {
+      throw new Error(
+        'Replication of an InactiveProcess is bisimilar to an InactiveProcess. The parser should handle that.',
+      );
+    }
+    case P.NODES.Replication: {
+      throw new Error(
+        'Replication of an Replication is bisimilar to a single Replication. The parser should handle that.',
+      );
+    }
+    case P.NODES.Matching: {
+      actionPrefixToSignalFirstMove.process = process;
+      return actionPrefixToSignalFirstMove;
+    }
+
+    case P.NODES.ProcessConstant: {
+      const decl = processConstantsAST[process.identifier];
+      return handleReplicatedProcess(decl.process);
+    }
+
+    case P.NODES.ActionPrefix:
+    case P.NODES.Restriction: {
+      // clone the process node, to do this without changing the original ast
+      const processprocess = process.process;
+      process.process = null as unknown as P.Process; // <-- temp: to not recursively clone the process
+      const processClone = JSON.parse(JSON.stringify(process)) as
+        | P.ActionPrefix
+        | P.Restriction;
+      process.process = processprocess;
+      processClone.process = processprocess;
+
+      actionPrefixToSignalFirstMove.process = processClone.process;
+      processClone.process = actionPrefixToSignalFirstMove;
+      return processClone;
+    }
+
+    case P.NODES.ParallelComposition:
+    case P.NODES.NonDeterministicChoice: {
+      // clone the process node, to do this without changing the original ast
+      const processprocesses = process.processes;
+      process.processes = []; // <-- temp: to not recursively clone the process
+      const processClone = JSON.parse(JSON.stringify(process)) as
+        | P.ParallelComposition
+        | P.NonDeterministicChoice;
+      process.processes = processprocesses;
+      processClone.processes = processprocesses.map(handleReplicatedProcess);
+
+      return processClone;
+    }
+
+    default: {
+      throw new Error('handleReplicatedProcess is not exaustive');
+    }
   }
 }

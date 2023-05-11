@@ -2,11 +2,11 @@ import * as S from '../src/scanner/index.js';
 import * as P from '../src/parser/index.js';
 import { transpileToGo } from '../src/transpiler/transpiler.js';
 
-describe('transpiler', () => {
-  it('true', () => {
-    expect(true).toBe(true);
-  });
-});
+// describe('transpiler', () => {
+//   it('true', () => {
+//     expect(true).toBe(true);
+//   });
+// });
 
 // const ast = P.parse(
 //   S.scanner(`
@@ -24,7 +24,7 @@ const ast = P.parse(
   S.scanner(`
     A = log<"a">;
     B = log<"b">;
-    C(c) = c<"c">;
+    C(c) = !c<"c">;
     main = (c)(C<c> | (!c(a).log<"received">.log<a>.A + B));
   `),
 );

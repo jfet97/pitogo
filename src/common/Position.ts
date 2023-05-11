@@ -5,4 +5,8 @@ export class Position {
     public column_start: number,
     public column_end: number,
   ) {}
+
+  static dummy(): Position {
+    return new Position(-1, -1, -1, -1);
+  }
 }

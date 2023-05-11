@@ -1,6 +1,6 @@
 {
   "name": "pitogo",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Transpile pi-calculus in Go",
   "type": "module",
   "engines": {
@@ -41,5 +41,23 @@
   },
   "volta": {
     "node": "18.12.1"
-  }
+  },
+  "files": [
+    "src",
+    "build"
+  ],
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./build/src/index.d.ts",
+        "default": "./build/src/index.js"
+      },
+      "import": {
+        "types": "./build/src/index.d.ts",
+        "default": "./build/src/index.js"
+      }
+    }
+  },
+  "types": "./build/src/index.d.ts",
+  "main": "./build/src/index.js"
 }
