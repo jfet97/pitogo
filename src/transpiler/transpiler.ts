@@ -208,20 +208,22 @@ ${channel.identifier} := NewChannelMessage()`,
   PhOnYcHaNnEl := make(chan struct{}, 1)
   PhOnYcHaNnEl <- struct{}{}
   select {
-    ${ast.processes.map((process) => {
-          switch (process._tag) {
-            case P.NODES.ActionPrefix: {
-              return `case ${transpileToGo(process.prefix)} :
-      ${transpileToGo(process.process)}`
-            }
-            default: {
-              return `case <- PhOnYcHaNnEl :
-      ${transpileToGo(process)}`
-            }
+    ${ast.processes
+      .map((process) => {
+        switch (process._tag) {
+          case P.NODES.ActionPrefix: {
+            return `case ${transpileToGo(process.prefix)} :
+      ${transpileToGo(process.process)}`;
           }
-        }).join('\n    ')}
+          default: {
+            return `case <- PhOnYcHaNnEl :
+      ${transpileToGo(process)}`;
+          }
+        }
+      })
+      .join('\n    ')}
   }
-}`
+}`;
     }
 
     // default:
