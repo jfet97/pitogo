@@ -163,7 +163,7 @@ ${channel.identifier} := NewChannelMessage()`,
     case P.NODES.ParallelComposition: {
       return `
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, ${ast.processes.length})
         ${ast.processes
           .map(
@@ -175,7 +175,7 @@ ${channel.identifier} := NewChannelMessage()`,
           .join('\n')}
         for i := 0; i < ${ast.processes.length}; i++ {
           <- dOne
-        }\n  }()\n`;
+        }\n  }\n`;
     }
 
     case P.NODES.Matching: {
@@ -189,7 +189,7 @@ ${channel.identifier} := NewChannelMessage()`,
     case P.NODES.Replication: {
       return `
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
       goOn := make(chan struct{}, 100)
       for {
         go func(goOn <- chan struct{}){
@@ -199,7 +199,7 @@ ${channel.identifier} := NewChannelMessage()`,
 
         goOn <- struct{}{}
       }
-    }()\n
+    }\n
       `;
     }
 

@@ -68,7 +68,7 @@ c.Channel() <- NewStringMessage("c")
 func D( ) {
 
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, 2)
         go func(dOne chan <- struct{}){
             A()
@@ -81,13 +81,13 @@ go func(dOne chan <- struct{}){
         for i := 0; i < 2; i++ {
           <- dOne
         }
-  }()
+  }
 
 }
 func E( ) {
 
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, 2)
         go func(dOne chan <- struct{}){
             
@@ -116,13 +116,13 @@ d := NewChannelMessage()
         for i := 0; i < 2; i++ {
           <- dOne
         }
-  }()
+  }
 
 }
 func F( ) {
 
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
       goOn := make(chan struct{}, 100)
       for {
         go func(goOn <- chan struct{}){
@@ -133,7 +133,7 @@ func F( ) {
 
         goOn <- struct{}{}
       }
-    }()
+    }
 
       
 }
@@ -141,7 +141,7 @@ func main() {
 
 
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, 6)
         go func(dOne chan <- struct{}){
             fmt.Println(NewStringMessage("main"))
@@ -153,7 +153,7 @@ go func(dOne chan <- struct{}){
 c := NewChannelMessage()
 
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, 2)
         go func(dOne chan <- struct{}){
             C(c)
@@ -170,7 +170,7 @@ fmt.Println(m)
         for i := 0; i < 2; i++ {
           <- dOne
         }
-  }()
+  }
 
           dOne <- struct{}{}  // signal completion
         }(dOne)
@@ -181,7 +181,7 @@ go func(dOne chan <- struct{}){
 go func(dOne chan <- struct{}){
             
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, 3)
         go func(dOne chan <- struct{}){
             A()
@@ -194,7 +194,7 @@ go func(dOne chan <- struct{}){
 go func(dOne chan <- struct{}){
             
       // nesting to avoid name collisions, I always use the same name for the channel
-      func(){
+      {
         dOne := make(chan struct{}, 2)
         go func(dOne chan <- struct{}){
             A()
@@ -207,14 +207,14 @@ go func(dOne chan <- struct{}){
         for i := 0; i < 2; i++ {
           <- dOne
         }
-  }()
+  }
 
           dOne <- struct{}{}  // signal completion
         }(dOne)
         for i := 0; i < 3; i++ {
           <- dOne
         }
-  }()
+  }
 
           dOne <- struct{}{}  // signal completion
         }(dOne)
@@ -229,6 +229,6 @@ go func(dOne chan <- struct{}){
         for i := 0; i < 6; i++ {
           <- dOne
         }
-  }()
+  }
 
 }
