@@ -151,7 +151,9 @@ ${channel.identifier} := NewChannelMessage()`,
     }
 
     case P.NODES.ReceiveMessage: {
-      return `${transpileToGo(ast.message)} := <- ${ast.channel.identifier}.Channel()\n`;
+      return `${transpileToGo(ast.message)} := <- ${
+        ast.channel.identifier
+      }.Channel()\n`;
     }
 
     case P.NODES.ProcessConstant: {
@@ -176,14 +178,29 @@ ${channel.identifier} := NewChannelMessage()`,
         }\n  }()\n`;
     }
 
-    case P.NODES.Matching : {
-
+    case P.NODES.Matching: {
       return `
       if ${transpileToGo(ast.left)} == ${transpileToGo(ast.right)} {
         ${transpileToGo(ast.process)}
       }
       `;
+    }
 
+    case P.NODES.Replication: {
+      return `
+      // nesting to avoid name collisions, I always use the same name for the channel
+      func(){
+      goOn := make(chan struct{}, 100)
+      for {
+        go func(goOn <- chan struct{}){
+            ${transpileToGo(ast.process)}
+          <- goOn  // signal completion the other way around
+        }(goOn)
+
+        goOn <- struct{}{}
+      }
+    }()\n
+      `;
     }
 
     //     case P.NODES.NonDeterministicChoice: {
