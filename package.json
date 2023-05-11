@@ -1,7 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
-  "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "name": "pitogo",
+  "version": "0.1.0",
+  "description": "Transpile pi-calculus in Go",
   "type": "module",
   "engines": {
     "node": ">= 18.12 <19"

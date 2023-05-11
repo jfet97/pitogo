@@ -1,4 +1,10 @@
-import { scanner } from './index.js';
+import { scanner } from '../src/scanner/index.js';
+
+describe('scanner', () => {
+  it('true', () => {
+    expect(true).toBe(true);
+  });
+});
 
 // console.log(
 //   scanner(`

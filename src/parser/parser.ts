@@ -37,9 +37,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
   function match(tag: S.Token['_tag']): boolean {
     return check(tag) && !!advance();
   }
-  function back(n = 1): void {
-    index -= n;
-  }
+  // function back(n = 1): void {
+  //   index -= n;
+  // }
 
   // parsers
 
@@ -427,6 +427,7 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
     if (prefixes[0]) {
       return prefixes[0];
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return primary!;
     }
   }

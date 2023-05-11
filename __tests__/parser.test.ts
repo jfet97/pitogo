@@ -1,5 +1,13 @@
-import { scanner } from '../scanner/index.js';
-import { parse } from './index.js';
+import { scanner } from '../src/scanner/index.js';
+import { parse } from '../src/parser/index.js';
+import { writeFileSync } from 'fs';
+import { prettyPrint } from '../src/parser/pretty_print.js';
+
+describe('parser', () => {
+  it('true', () => {
+    expect(true).toBe(true);
+  });
+});
 
 const ast = parse(
   scanner(`
@@ -60,9 +68,7 @@ console.log(prettyPrint(ast));
 // );
 
 // serialize ast on a file called ast.json
-import { writeFileSync } from 'fs';
-import { prettyPrint } from './pretty_print.js';
-writeFileSync('./src/parser/ast.json', JSON.stringify(ast, null, 2));
+writeFileSync('./__tests__/ast.json', JSON.stringify(ast, null, 2));
 
 // console.log(
 //   scanner(`

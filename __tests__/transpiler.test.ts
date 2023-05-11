@@ -1,6 +1,12 @@
-import * as S from '../scanner/index.js';
-import * as P from '../parser/index.js';
-import { transpileToGo } from './transpiler.js';
+import * as S from '../src/scanner/index.js';
+import * as P from '../src/parser/index.js';
+import { transpileToGo } from '../src/transpiler/transpiler.js';
+
+describe('transpiler', () => {
+  it('true', () => {
+    expect(true).toBe(true);
+  });
+});
 
 // const ast = P.parse(
 //   S.scanner(`
@@ -20,10 +26,10 @@ const ast = P.parse(
     B = log<"b">;
     C(c) = c<"c">;
     main = (c)(C<c> | (!c(a).log<"received">.log<a>.A + B));
-  `)
-)
+  `),
+);
 const go = transpileToGo(ast);
 console.log(go);
 import { writeFileSync } from 'fs';
 
-writeFileSync('./src/transpiler/program.go', go);
+writeFileSync('./__tests__/program.go', go);
