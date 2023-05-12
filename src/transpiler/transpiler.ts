@@ -284,29 +284,39 @@ function handleReplicatedProcess(process: P.Process): P.Process {
         'Replication of an Replication is bisimilar to a single Replication. The parser should handle that.',
       );
     }
-    case P.NODES.Matching: {
-      actionPrefixToSignalFirstMove.process = process;
-      return actionPrefixToSignalFirstMove;
-    }
 
     case P.NODES.ProcessConstant: {
       const decl = processConstantsAST[process.identifier];
       return handleReplicatedProcess(decl.process);
     }
 
-    case P.NODES.ActionPrefix:
-    case P.NODES.Restriction: {
+    case P.NODES.ActionPrefix: {
       // clone the process node, to do this without changing the original ast
       const processprocess = process.process;
       process.process = null as unknown as P.Process; // <-- temp: to not recursively clone the process
-      const processClone = JSON.parse(JSON.stringify(process)) as
-        | P.ActionPrefix
-        | P.Restriction;
+      const processClone = JSON.parse(
+        JSON.stringify(process),
+      ) as P.ActionPrefix;
+
       process.process = processprocess;
       processClone.process = processprocess;
 
       actionPrefixToSignalFirstMove.process = processClone.process;
       processClone.process = actionPrefixToSignalFirstMove;
+      return processClone;
+    }
+
+    case P.NODES.Restriction:
+    case P.NODES.Matching: {
+      // clone the process node, to do this without changing the original ast
+      const processprocess = process.process;
+      process.process = null as unknown as P.Process; // <-- temp: to not recursively clone the process
+      const processClone = JSON.parse(JSON.stringify(process)) as
+        | P.Restriction
+        | P.Matching;
+      process.process = processprocess;
+      processClone.process = handleReplicatedProcess(processprocess);
+
       return processClone;
     }
 
