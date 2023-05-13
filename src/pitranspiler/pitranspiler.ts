@@ -31,8 +31,8 @@ export function transpileToPi(ast: P.Node): string {
             return `main = ${transpileToPi(ast.process)};`
         }
 
-        case P.NODES.Declaration: { //TODO: Add parameter passing
-            return `${ast.identifier.identifier} = ${transpileToPi(ast.process)}`
+        case P.NODES.Declaration: {
+            return `${ast.identifier.identifier}${ast.parameters.length > 0 ? `(${ast.parameters.map(par => par.identifier).join(', ')})` : ''} = ${transpileToPi(ast.process)}`
         }
 
         case P.NODES.Restriction: {
@@ -55,7 +55,7 @@ export function transpileToPi(ast: P.Node): string {
             return `${transpileToPi(ast.prefix)}.(${transpileToPi(ast.process)})`
         }
 
-        case P.NODES.SendMessage: { //TODO: Add process constant parameter passing
+        case P.NODES.SendMessage: {
             return `${ast.channel.identifier}<${transpileToPi(ast.message)}>`
         }
 

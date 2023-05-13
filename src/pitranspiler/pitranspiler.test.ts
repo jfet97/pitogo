@@ -6,8 +6,8 @@ const ast = P.parse(
   S.scanner(`
     A = log<"a">;
     B = log<"b">;
-    C(a) = c<"c">;
-    main = (c)(C | (!c(a).log<"received">.log<a>.A + B));
+    C(c) = c<"c">;
+    main = (c)(C<c> | (!c(a).log<"received">.log<a>.A + B));
   `)
 )
 const go = transpileToPi(ast);
