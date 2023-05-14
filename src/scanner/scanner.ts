@@ -101,7 +101,7 @@ export function scanner(input: string): Token[] {
         }
 
         if (isAtEnd()) {
-          throw new Error('Unterminated string');
+          raise('Unterminated string');
         }
 
         // the closing "
@@ -163,13 +163,13 @@ export function scanner(input: string): Token[] {
             } else if (identifier.toUpperCase() === identifier) {
               addToken(TOKENS.ProcessConstant, identifier);
             } else {
-              throw new Error(
+              raise(
                 `Unexpected identifier: ${identifier}. Use only lowercase for channels and messages, uppercase for process constants`,
               );
             }
           }
         } else {
-          throw new Error(`Unexpected character: ${char}`);
+          raise(`Unexpected character: ${char}`);
         }
       }
     }
@@ -179,4 +179,12 @@ export function scanner(input: string): Token[] {
   }
 
   return toRet;
+
+  // error
+  function raise(message: string): never {
+    throw {
+      message: `Error: ${message}`,
+      position,
+    };
+  }
 }
