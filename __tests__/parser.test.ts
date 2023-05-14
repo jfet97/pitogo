@@ -9,15 +9,24 @@ import { prettyPrint } from '../src/parser/pretty_print.js';
 //   });
 // });
 
+// const ast = parse(
+//   scanner(`
+//     A = (ab)as<ab>.ab<m>.nil;
+//     S = !as(x).bs<x>.nil;
+//     B = bs(y).y(w).log<y>.log<w>;
+//     C(x) = x<"a">;
+//     main = (as)(bs)A | S | B + C<as>;
+//   `),
+// );
+
 const ast = parse(
   scanner(`
-    A = (ab)as<ab>.ab<m>.nil;
-    S = !as(x).bs<x>.nil;
-    B = bs(y).y(w).log<y>.log<w>;
-    C(x) = x<"a">;
-    main = (as)(bs)A | S | B + C<as>;
+    C(s) = log<s>;
+    D = log<"ciao">;
+    main = C<"c"> | D.C<"c">;
   `),
 );
+
 
 // const ast = parse(
 //   scanner(`

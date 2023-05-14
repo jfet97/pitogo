@@ -641,11 +641,12 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
 
   // error
   function raise(message: string): never {
-    throw new Error(
-      `Error: ${message} at ${JSON.stringify(
+    throw {
+      message: `Error: ${message} at ${JSON.stringify(
         tokens[index]?.position || tokens[index - 1]?.position,
       )}`,
-    );
+      position: tokens[index]?.position || tokens[index - 1]?.position,
+    };
   }
 
   return parseProgram();
