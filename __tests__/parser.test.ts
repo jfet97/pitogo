@@ -19,11 +19,19 @@ import { prettyPrint } from '../src/parser/pretty_print.js';
 //   `),
 // );
 
+// const ast = parse(
+//   scanner(`
+//     C(s) = log<s>;
+//     D = log<"ciao">;
+//     main = C<"c"> | D.C<"c">;
+//   `),
+// );
+
 const ast = parse(
   scanner(`
-    C(s) = log<s>;
-    D = log<"ciao">;
-    main = C<"c"> | D.C<"c">;
+  A = log<123>;
+  C(x) = x<"a">;
+  main = (as)A + C<as>;
   `),
 );
 

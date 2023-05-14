@@ -1,10 +1,10 @@
 import { scanner } from '../src/scanner/index.js';
 
-describe('scanner', () => {
-  it('true', () => {
-    expect(true).toBe(true);
-  });
-});
+// describe('scanner', () => {
+//   it('true', () => {
+//     expect(true).toBe(true);
+//   });
+// });
 
 // console.log(
 //   scanner(`
@@ -24,12 +24,14 @@ describe('scanner', () => {
 
 console.log(
   scanner(`
-  A = (ab)ab<"ciao">.nil;
-`),
+  A = log<123>;
+  C(x) = x<"a">;
+  main = (as)A + C<as>;
+  `),
 );
 
-console.log(
-  scanner(`
-  A = (ab)ab<23.23>.nil;
-`),
-);
+// console.log(
+//   scanner(`
+//   A = (ab)ab<23.23>.nil;
+// `),
+// );
