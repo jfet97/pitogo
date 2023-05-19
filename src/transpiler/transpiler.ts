@@ -24,6 +24,11 @@ const processConstantsAST: Record<string, P.Declaration> = {};
 export function transpileToGo(ast: P.Node): string {
   switch (ast._tag) {
     case P.NODES.Program: {
+      // reset
+      for (const k in processConstantsAST) {
+        delete processConstantsAST[k];
+      }
+
       return `
 package main
 
