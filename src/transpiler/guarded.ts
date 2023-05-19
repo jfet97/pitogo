@@ -26,13 +26,19 @@ export function isRecursionGuarded(
             ),
         )
         // check remaining declarations
-        .forEach((d) => isRecursionGuarded(d, [d.identifier.identifier]));
+        .forEach((d) => isRecursionGuarded(d));
 
       break;
     }
     case P.NODES.Declaration: {
-      isRecursionGuarded(node.process);
-      guardedProcessConstants.push(node.identifier.identifier);
+      if (!guardedProcessConstants.includes(node.identifier.identifier)) {
+        isRecursionGuarded(node.process, [
+          ...visitedProcessConstants,
+          node.identifier.identifier,
+        ]);
+        guardedProcessConstants.push(node.identifier.identifier);
+      }
+
       break;
     }
     case P.NODES.Main: {
@@ -48,10 +54,10 @@ export function isRecursionGuarded(
           // :)
         } else {
           // check declaration first time is used
-          isRecursionGuarded(processConstantsAST[node.identifier], [
-            ...visitedProcessConstants,
-            node.identifier,
-          ]);
+          isRecursionGuarded(
+            processConstantsAST[node.identifier],
+            visitedProcessConstants,
+          );
         }
       }
       break;
