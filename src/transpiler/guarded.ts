@@ -26,7 +26,7 @@ export function isRecursionGuarded(
             ),
         )
         // check remaining declarations
-        .forEach((d) => isRecursionGuarded(d));
+        .forEach((d) => isRecursionGuarded(d, [d.identifier.identifier]));
 
       break;
     }
