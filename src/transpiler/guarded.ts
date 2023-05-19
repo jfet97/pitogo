@@ -10,11 +10,16 @@ export function isRecursionGuarded(
   switch (node._tag) {
     case P.NODES.Program: {
       // defer declarations checking, just collect asts
-      node.declarations.forEach(
-        (declaration) =>
-          (processConstantsAST[declaration.identifier.identifier] =
-            declaration),
-      );
+      node.declarations.forEach((declaration) => {
+        if (processConstantsAST[declaration.identifier.identifier]) {
+          raise(
+            `Process constant ${declaration.identifier.identifier} already declared`,
+            declaration,
+          );
+        } else {
+          processConstantsAST[declaration.identifier.identifier] = declaration;
+        }
+      });
 
       isRecursionGuarded(node.main);
 
