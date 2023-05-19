@@ -9,8 +9,14 @@ export function isRecursionGuarded(
 ): void {
   switch (node._tag) {
     case P.NODES.Program: {
+      // reset
+      for (const k in processConstantsAST) {
+        delete processConstantsAST[k];
+      }
+      guardedProcessConstants.length = 0;
+
       // defer declarations checking, just collect asts
-      [...node.declarations].reverse().forEach((declaration) => {
+      node.declarations.forEach((declaration) => {
         if (processConstantsAST[declaration.identifier.identifier]) {
           raise(
             `Process constant ${declaration.identifier.identifier} already declared`,
