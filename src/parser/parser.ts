@@ -334,7 +334,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
             matches[0].position.column_start,
             matches[matches.length - 1].position.column_end,
           ),
-          processes: matches,
+          processes: matches.filter(
+            (p) => p._tag !== AST.NODES.InactiveProcess,
+          ),
         })
       : matches[0];
   }
@@ -360,7 +362,9 @@ export function parse(tokens: readonly S.Token[]): AST.Program {
             processes[0].position.column_start,
             processes[processes.length - 1].position.column_end,
           ),
-          processes,
+          processes: processes.filter(
+            (p) => p._tag !== AST.NODES.InactiveProcess,
+          ),
         })
       : processes[0];
   }
