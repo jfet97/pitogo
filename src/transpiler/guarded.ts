@@ -103,7 +103,16 @@ export function isRecursionGuarded(
       break;
     }
 
-    case P.NODES.NonDeterministicChoice:
+    case P.NODES.NonDeterministicChoice: {
+      return node.processes.forEach(
+        (choice) =>
+          !(
+            choice._tag === P.NODES.ActionPrefix &&
+            choice.prefix._tag === P.NODES.ReceiveMessage
+          ) && raise(`${choice} must be guarded by a read action`, choice),
+      );
+    }
+
     case P.NODES.ParallelComposition: {
       return node.processes.forEach((choice) =>
         isRecursionGuarded(choice, visitedProcessConstants),
