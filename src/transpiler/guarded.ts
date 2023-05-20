@@ -108,8 +108,11 @@ export function isRecursionGuarded(
         (choice) =>
           !(
             choice._tag === P.NODES.ActionPrefix &&
-            choice.prefix._tag === P.NODES.ReceiveMessage
-          ) && raise(`${choice} must be guarded by a read action`, choice),
+            (choice.prefix._tag === P.NODES.ReceiveMessage ||
+              (choice.prefix._tag === P.NODES.SendMessage &&
+                choice.prefix.channel._tag !== P.NODES.ProcessConstant) ||
+              choice.prefix._tag === P.NODES.Log)
+          ) && raise(`${choice._tag} must be guarded by an action`, choice),
       );
     }
 

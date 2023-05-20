@@ -238,8 +238,6 @@ ${channel.identifier} := NewChannelMessage()`,
 
     case P.NODES.NonDeterministicChoice: {
       return `{
-  PhOnYcHaNnEl := make(chan struct{}, 1)
-  PhOnYcHaNnEl <- struct{}{}
   select {
     ${ast.processes
       .map((process) => {
@@ -249,8 +247,7 @@ ${channel.identifier} := NewChannelMessage()`,
       ${transpileToGo(process.process)}`;
           }
           default: {
-            return `case <- PhOnYcHaNnEl :
-      ${transpileToGo(process)}`;
+            raise('non guarded non-determnism not implemented', ast);
           }
         }
       })
@@ -285,14 +282,18 @@ function handleReplicatedProcess(process: P.Process): P.Process {
 
   switch (process._tag) {
     case P.NODES.InactiveProcess: {
-      throw new Error(
+      raise(
         'Replication of an InactiveProcess is bisimilar to an InactiveProcess. The parser should handle that.',
+        process,
       );
+      break;
     }
     case P.NODES.Replication: {
-      throw new Error(
+      raise(
         'Replication of an Replication is bisimilar to a single Replication. The parser should handle that.',
+        process,
       );
+      break;
     }
 
     case P.NODES.ProcessConstant: {
@@ -345,7 +346,16 @@ function handleReplicatedProcess(process: P.Process): P.Process {
     }
 
     default: {
-      throw new Error('handleReplicatedProcess is not exaustive');
+      raise('handleReplicatedProcess is not exaustive', process);
+      break;
     }
   }
+}
+
+// error
+function raise(message: string, node: P.Node): never {
+  throw {
+    message: `Error: ${message}`,
+    position: node.position,
+  };
 }
