@@ -110,8 +110,12 @@ ${ast.declarations.map((d) => `_ = ${d.identifier.identifier}`).join('\n')}
     }
 
     case P.NODES.ActionPrefix: {
-      return `${transpileToGo(ast.prefix)}
-${transpileToGo(ast.process)}`;
+      if (ast.process._tag === P.NODES.InactiveProcess) {
+        return `${transpileToGo(ast.prefix)}`;
+      } else {
+        return `${transpileToGo(ast.prefix)}
+          ${transpileToGo(ast.process)}`;
+      }
     }
 
     case P.NODES.Log: {
@@ -140,9 +144,10 @@ ${transpileToGo(ast.process)}`;
         ast.parameters
           .map((identifier) => identifier.identifier + ' Message')
           .join(', ') +
-        ` ) {\n` +
-        transpileToGo(ast.process) +
-        '\n}'
+        `) {
+          ${transpileToGo(ast.process)}
+        }
+        `
       );
     }
 
