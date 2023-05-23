@@ -122,6 +122,46 @@ export function scanner(input: string): Token[] {
         break;
       }
 
+      case '/': {
+        if (peek() === '/') {
+          // newline comment, ignore until the end of the line
+          while (peek() !== '\n' && !isAtEnd()) {
+            advance();
+          }
+          if(!isAtEnd()){
+            newline();
+            advance();
+          }
+          break;
+        } else if (peek() === '*') {
+          // multiline comment, ignore until the end of the comment
+
+          let commentTerminated = false;
+          while(!commentTerminated) {
+            do {
+              if (peek() === '\n') newline();
+              advance();
+              console.log({ciao: peek()})
+            } while (peek() !== '*' && !isAtEnd());
+
+            if (isAtEnd()) {
+              raise('Unterminated comment');
+            }
+            advance();
+            if(peek() === '/') {
+              commentTerminated = true;
+            }
+          }
+
+          // the closing */
+          advance();
+          break;
+        } else {
+          raise('Unexpected character: /');
+        }
+        break;
+      }
+
       default: {
         if (/[0-9]/.test(char)) {
           // handle numeric literals

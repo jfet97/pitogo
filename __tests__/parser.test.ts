@@ -35,6 +35,15 @@ const ast = parse(
   `),
 );
 
+// Test: Parentheses
+// const ast = parse(
+//   scanner(`
+//     A = log<"a">.(nil);
+//     B = log<"b">.(nil);
+//     C(c) = c<"c">.(nil);
+//     main = (c)((C<c>.(nil)) | (!((c(a).(log<"received">.(log<a>.(A)))) + (B))));
+//   `)
+// );
 
 // const ast = parse(
 //   scanner(`
