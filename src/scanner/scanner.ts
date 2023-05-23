@@ -128,7 +128,7 @@ export function scanner(input: string): Token[] {
           while (peek() !== '\n' && !isAtEnd()) {
             advance();
           }
-          if(!isAtEnd()){
+          if (!isAtEnd()) {
             newline();
             advance();
           }
@@ -137,18 +137,17 @@ export function scanner(input: string): Token[] {
           // multiline comment, ignore until the end of the comment
 
           let commentTerminated = false;
-          while(!commentTerminated) {
+          while (!commentTerminated) {
             do {
               if (peek() === '\n') newline();
               advance();
-              console.log({ciao: peek()})
             } while (peek() !== '*' && !isAtEnd());
 
             if (isAtEnd()) {
               raise('Unterminated comment');
             }
             advance();
-            if(peek() === '/') {
+            if (peek() === '/') {
               commentTerminated = true;
             }
           }
