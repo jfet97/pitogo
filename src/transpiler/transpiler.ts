@@ -221,9 +221,9 @@ ${channel.identifier} := NewChannelMessage()`,
       // nesting to avoid name collisions, I always use the same name for the channel
       {
         goOn := NewChannelMessage()
-        a := 300
-        b := rand.Intn(100)
-        for ; b < a; {
+        aA := 300
+        bB := rand.Intn(100)
+        for ; bB < aA; {
           go func(){
           ${p}
           }()
