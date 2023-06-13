@@ -83,17 +83,8 @@ func (m Message) Println() {
 // usage: fmt.Println(NewStringMessage("hello"))
 // result: Message<"hello">
 
-func Log(log <- chan Message) {
-  for {
-    fmt.Println(<- log)
-  }
-}
-
 
 func main() {
-  log := make(chan Message)
-  go Log(log)
-
   ${ast.declarations
     .map((d) => `${d.identifier.identifier} := ${transpileToGo(d)}`)
     .join('\n')}
@@ -119,7 +110,7 @@ ${ast.declarations.map((d) => `_ = ${d.identifier.identifier}`).join('\n')}
     }
 
     case P.NODES.Log: {
-      return `log <- ${transpileToGo(ast.message)}`;
+      return `fmt.Println(${transpileToGo(ast.message)})`;
     }
     case P.NODES.InactiveProcess: {
       return '';

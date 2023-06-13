@@ -1,6 +1,6 @@
 {
   "name": "pitogo",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Transpile pi-calculus in Go",
   "type": "module",
   "engines": {
