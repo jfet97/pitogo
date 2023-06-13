@@ -25,7 +25,8 @@ const ast = P.parse(
     A = log<"a">;
     B = log<"b">;
     C(c) = !c<"c">;
-    main = (c)(C<c> | (!c(a).log<"received">.log<a>.A + B));
+    D = (c)(C<c> | (!c(a).log<"received">.log<a>.A + B));
+    main = (a)(b)(c)(!log<"ciao"> + log<"pizza"> + a<"yo">) | (!a(msg).log<msg>);
   `),
 );
 const go = transpileToGo(ast);

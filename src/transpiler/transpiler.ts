@@ -76,12 +76,12 @@ func (m Message) Channel() (chan Message) {
 	}
 }
 
+// usage: fmt.Println(NewStringMessage("hello"))
+// result: Message<"hello">
 func (m Message) Println() {
 	fmt.Println(m.String())
 }
 
-// usage: fmt.Println(NewStringMessage("hello"))
-// result: Message<"hello">
 
 
 func main() {
@@ -91,7 +91,7 @@ func main() {
 
   ${transpileToGo(ast.main)}
 
-  // avoid declared and not used errors
+  // Avoid declared and not used errors
 ${ast.declarations.map((d) => `_ = ${d.identifier.identifier}`).join('\n')}
 }`;
     }
@@ -147,7 +147,8 @@ ${ast.declarations.map((d) => `_ = ${d.identifier.identifier}`).join('\n')}
         ast.channels
           .map(
             (channel) => `
-${channel.identifier} := NewChannelMessage()`,
+${channel.identifier} := NewChannelMessage()
+_ = ${channel.identifier}`,
           )
           .join('\n') +
         '\n' +
@@ -181,7 +182,6 @@ ${channel.identifier} := NewChannelMessage()`,
 
     case P.NODES.ParallelComposition: {
       return `
-      // nesting to avoid name collisions, I always use the same name for the channel
       {
         dOne := make(chan struct{}, ${ast.processes.length})
         ${ast.processes
@@ -209,7 +209,6 @@ ${channel.identifier} := NewChannelMessage()`,
       const p = transpileToGo(handleReplicatedProcess(ast.process));
 
       return `
-      // nesting to avoid name collisions, I always use the same name for the channel
       {
         goOn := NewChannelMessage()
         aA := 300
@@ -229,13 +228,26 @@ ${channel.identifier} := NewChannelMessage()`,
 
     case P.NODES.NonDeterministicChoice: {
       return `{
+        ${ast.processes.some(proc => proc._tag == P.NODES.ActionPrefix && proc.prefix._tag == P.NODES.Log) ? `
+        pHoNyChAnNeL := make(chan struct{}, 1)
+        pHoNyChAnNeL <- struct{}{}
+        ` : ''}
   select {
     ${ast.processes
       .map((process) => {
         switch (process._tag) {
           case P.NODES.ActionPrefix: {
-            return `case ${transpileToGo(process.prefix)} :
-      ${transpileToGo(process.process)}`;
+            switch (process.prefix._tag){
+              case P.NODES.Log:{
+                return `case <-pHoNyChAnNeL :
+                ${transpileToGo(process.prefix)}
+                ${transpileToGo(process.process)}`;
+              }
+              default:{
+                return `case ${transpileToGo(process.prefix)} :
+                ${transpileToGo(process.process)}`;
+              }
+            }
           }
           default: {
             raise('non guarded non-determnism not implemented', ast);
