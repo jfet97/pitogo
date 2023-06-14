@@ -65,6 +65,12 @@ export function isRecursionGuarded(
           // :)
         } else {
           // check declaration first time is used
+          if (!processConstantsAST[node.identifier]) {
+            raise(
+              `${P.NODES.ProcessConstant} ${node.identifier} is not declared or it is declared after main`,
+              node,
+            );
+          }
           isRecursionGuarded(
             processConstantsAST[node.identifier],
             visitedProcessConstants,

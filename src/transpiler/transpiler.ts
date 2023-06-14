@@ -228,22 +228,30 @@ _ = ${channel.identifier}`,
 
     case P.NODES.NonDeterministicChoice: {
       return `{
-        ${ast.processes.some(proc => proc._tag == P.NODES.ActionPrefix && proc.prefix._tag == P.NODES.Log) ? `
+        ${
+          ast.processes.some(
+            (proc) =>
+              proc._tag == P.NODES.ActionPrefix &&
+              proc.prefix._tag == P.NODES.Log,
+          )
+            ? `
         pHoNyChAnNeL := make(chan struct{}, 1)
         pHoNyChAnNeL <- struct{}{}
-        ` : ''}
+        `
+            : ''
+        }
   select {
     ${ast.processes
       .map((process) => {
         switch (process._tag) {
           case P.NODES.ActionPrefix: {
-            switch (process.prefix._tag){
-              case P.NODES.Log:{
+            switch (process.prefix._tag) {
+              case P.NODES.Log: {
                 return `case <-pHoNyChAnNeL :
                 ${transpileToGo(process.prefix)}
                 ${transpileToGo(process.process)}`;
               }
-              default:{
+              default: {
                 return `case ${transpileToGo(process.prefix)} :
                 ${transpileToGo(process.process)}`;
               }
@@ -301,6 +309,12 @@ function handleReplicatedProcess(process: P.Process): P.Process {
 
     case P.NODES.ProcessConstant: {
       const decl = processConstantsAST[process.identifier];
+      if (!decl) {
+        raise(
+          `Process constant ${process.identifier} not declared or it is declared after main`,
+          process,
+        );
+      }
       return handleReplicatedProcess(decl.process);
     }
 
