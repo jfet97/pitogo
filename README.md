@@ -4,7 +4,7 @@ PiTOGo is a compiler from $\pi$-calculus expressions into golang code written in
 
 
 ## Usage
-#### Requires nodejs and npm installed on your machine.
+#### Requires nodejs, npm and pnpm installed on your machine.
 
 First, in the root directory of the project, run the following command to install dependencies:
 ```bash
