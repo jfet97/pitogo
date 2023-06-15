@@ -136,8 +136,6 @@ export function isRecursionGuarded(
 
     case P.NODES.InactiveProcess: {
       // :)
-      // I think it is guarded, but I'm not sure
-      raise(`${P.NODES.InactiveProcess} is not guarded`, node);
       break;
     }
 
@@ -162,7 +160,7 @@ export function isRecursionGuarded(
     }
 
     case P.NODES.Log: {
-      raise(`${P.NODES.Log} is not guarded`, node);
+      // :)
       break;
     }
   }
