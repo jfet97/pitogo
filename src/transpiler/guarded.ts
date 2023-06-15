@@ -93,19 +93,19 @@ export function isRecursionGuarded(
         case P.NODES.SendMessage: {
           switch (node.prefix.channel._tag) {
             case P.NODES.ProcessConstant: {
-              return isRecursionGuarded(
-                node.prefix.channel,
-                visitedProcessConstants,
-              );
+              isRecursionGuarded(node.prefix.channel, visitedProcessConstants);
+              break;
             }
             case P.NODES.Identifier: {
               // :)
               break;
             }
           }
+
           break;
         }
       }
+      isRecursionGuarded(node.process, []);
       break;
     }
 
